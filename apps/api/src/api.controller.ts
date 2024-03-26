@@ -1,4 +1,14 @@
-import { Controller, Get, Post, HttpCode, HttpStatus, Logger, Query, Body, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Query,
+  Body,
+  Put,
+} from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiService } from './api.service';
 
@@ -18,13 +28,14 @@ export class ApiController {
   @ApiOperation({ summary: 'Check the health status of the service' })
   @ApiOkResponse({ description: 'Service is healthy' })
   health() {
+    console.log('health');
     return {
       status: HttpStatus.OK,
       message: 'Service is healthy',
     };
   }
 
-  @Post('accounts')
+  @Get('accounts')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request to create a new account' })
   @ApiOkResponse({ description: 'Account created successfully' })
