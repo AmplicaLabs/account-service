@@ -28,10 +28,7 @@ describe('Account Service E2E request verification!', () => {
   });
 
   it('(GET) /api/health', () =>
-    request(app.getHttpServer())
-      .get('/api/health')
-      .expect(200)
-      .expect({ status: 200, message: 'Service is healthy' }));
+    request(app.getHttpServer()).get('/api/health').expect(200).expect({ status: 200, message: 'Service is healthy' }));
 
   //   describe('(POST) /api/update-graph', () => {
   //     it('Valid public graph update request should work', async () => {
