@@ -21,7 +21,7 @@ export class CreateUserAccountRequest {
 
   @IsNotEmpty()
   @IsEnum({ AlgoType })
-  algo: AlgoType;
+  algo: AlgoType.SR25519;
 
   @IsNotEmpty()
   baseHandle: string;

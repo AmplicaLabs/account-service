@@ -14,12 +14,7 @@ export default async () => {
           },
         ],
       ],
-      controllers: [
-        [
-          import('./api.controller'),
-          { ApiController: { health: {}, createAccount: { type: Object } } },
-        ],
-      ],
+      controllers: [[import('./api.controller'), { ApiController: { health: {}, createAccount: { type: Object } } }]],
     },
   };
 };

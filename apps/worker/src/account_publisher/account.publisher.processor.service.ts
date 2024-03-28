@@ -165,9 +165,7 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
   private async checkCapacity(): Promise<void> {
     try {
       const capacityLimit = this.configService.getCapacityLimit();
-      const capacityInfo = await this.blockchainService.capacityInfo(
-        this.configService.getProviderId(),
-      );
+      const capacityInfo = await this.blockchainService.capacityInfo(this.configService.getProviderId());
       const { remainingCapacity } = capacityInfo;
       const { currentEpoch } = capacityInfo;
       const epochCapacityKey = `epochCapacity:${currentEpoch}`;
@@ -178,20 +176,15 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
         this.logger.debug(`Capacity remaining: ${remainingCapacity}`);
         if (capacityLimit.type === 'percentage') {
           const capacityLimitPercentage = BigInt(capacityLimit.value);
-          const capacityLimitThreshold =
-            (capacityInfo.totalCapacityIssued * capacityLimitPercentage) / 100n;
+          const capacityLimitThreshold = (capacityInfo.totalCapacityIssued * capacityLimitPercentage) / 100n;
           this.logger.debug(`Capacity limit threshold: ${capacityLimitThreshold}`);
           if (epochUsedCapacity >= capacityLimitThreshold) {
             outOfCapacity = true;
-            this.logger.warn(
-              `Capacity threshold reached: used ${epochUsedCapacity} of ${capacityLimitThreshold}`,
-            );
+            this.logger.warn(`Capacity threshold reached: used ${epochUsedCapacity} of ${capacityLimitThreshold}`);
           }
         } else if (epochUsedCapacity >= capacityLimit.value) {
           outOfCapacity = true;
-          this.logger.warn(
-            `Capacity threshold reached: used ${epochUsedCapacity} of ${capacityLimit.value}`,
-          );
+          this.logger.warn(`Capacity threshold reached: used ${epochUsedCapacity} of ${capacityLimit.value}`);
         }
       }
 
@@ -219,9 +212,7 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
           console.error(err);
         }
       } else {
-        this.logger.verbose(
-          'Capacity Available: Resuming account change publish queue and clearing timeout',
-        );
+        this.logger.verbose('Capacity Available: Resuming account change publish queue and clearing timeout');
         // Get the failed jobs and check if they failed due to capacity
         const failedJobs = await this.accountChangePublishQueue.getFailed();
         const capacityFailedJobs = failedJobs.filter((job) =>
