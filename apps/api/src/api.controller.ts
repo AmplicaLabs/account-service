@@ -1,16 +1,8 @@
-import {
-  Controller,
-  Get,
-  Post,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Query,
-  Body,
-  Put,
-} from '@nestjs/common';
+import { Controller, Get, Post, HttpCode, HttpStatus, Logger, Query, Body, Put } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiService } from './api.service';
+import { WalletLoginResponseDTO } from '../../../libs/common/src/dtos/wallet.login.response.dto';
+import { WalletLoginRequestDTO } from '../../../libs/common/src/dtos/wallet.login.request.dto';
 
 @Controller('api')
 @ApiTags('account-service')
@@ -54,6 +46,22 @@ export class ApiController {
     } catch (error) {
       this.logger.error(error);
       throw new Error('Failed to create account');
+    }
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request to sign in with Frequency' })
+  @ApiOkResponse({ description: 'Signed in successfully', type: WalletLoginResponseDTO })
+  @ApiBody({ type: WalletLoginRequestDTO })
+  async signInWithFrequency(@Body() walletLoginRequestDTO: WalletLoginRequestDTO): Promise<WalletLoginResponseDTO> {
+    try {
+      const loginResponse = await this.apiService.signInWithFrequency(walletLoginRequestDTO);
+      // REMOVE:
+      return loginResponse;
+    } catch (error) {
+      this.logger.error(error);
+      throw new Error('Failed to sign in with Frequency');
     }
   }
 

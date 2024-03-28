@@ -30,6 +30,30 @@ describe('Account Service E2E request verification!', () => {
   it('(GET) /api/health', () =>
     request(app.getHttpServer()).get('/api/health').expect(200).expect({ status: 200, message: 'Service is healthy' }));
 
+  describe('(POST) /api/login', () => {
+    it('Sign In With Frequency request should work', async () => {
+      const siwfRequest: WalletLoginRequestDTO = {
+        dsnpId: '2',
+        connections: {
+          data: [
+            {
+              dsnpId: '4',
+              privacyType: PrivacyType.Public,
+              direction: Direction.ConnectionTo,
+              connectionType: ConnectionType.Follow,
+            } as ConnectionDto,
+          ],
+        },
+      };
+
+      return request(app.getHttpServer())
+        .post(`/api/login`)
+        .send(siwfRequest)
+        .expect(201)
+        .expect((res) => expect(res.text).toContain('referenceId'));
+    });
+  });
+
   //   describe('(POST) /api/update-graph', () => {
   //     it('Valid public graph update request should work', async () => {
   //       const validGraphChangeRequest: ProviderGraphDto = {
