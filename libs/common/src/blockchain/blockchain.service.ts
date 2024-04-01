@@ -140,6 +140,20 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     return schema;
   }
 
+  public async getMsaIdMax() {
+    const count = await this.query('msa', 'currentMsaIdentifierMaximum');
+    return parseInt(count);
+  }
+
+  public async isValidMsaId(msaId: number): Promise<boolean> {
+    const msaIdMax = await this.getMsaIdMax();
+    return msaId > 0 && msaId < msaIdMax;
+  }
+
+  public async getHandleForMsa(msaId: number): Promise<string> {
+    return await this.rpc('handles', 'getHandleForMsa', msaId);
+  }
+
   public async capacityInfo(providerId: string): Promise<{
     providerId: string;
     currentBlockNumber: number;
