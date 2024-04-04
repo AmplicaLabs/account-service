@@ -84,7 +84,9 @@ describe('AccountSericeConfig', () => {
 
     it('invalid frequency url should fail', async () => {
       const { FREQUENCY_URL: dummy, ...env } = ALL_ENV;
-      await expect(setupConfigService({ FREQUENCY_URL: 'invalid url', ...env })).rejects.toBeDefined();
+      await expect(
+        setupConfigService({ FREQUENCY_URL: 'invalid url', ...env }),
+      ).rejects.toBeDefined();
     });
 
     it('invalid api port should fail', async () => {
@@ -93,7 +95,11 @@ describe('AccountSericeConfig', () => {
     });
 
     it('missing graph environment dev config should fail', async () => {
-      const { ACCOUNT_ENVIRONMENT_TYPE: dummy, ACCOUNT_ENVIRONMENT_DEV_CONFIG: dummy2, ...env } = ALL_ENV;
+      const {
+        ACCOUNT_ENVIRONMENT_TYPE: dummy,
+        ACCOUNT_ENVIRONMENT_DEV_CONFIG: dummy2,
+        ...env
+      } = ALL_ENV;
       await expect(
         setupConfigService({
           ACCOUNT_ENVIRONMENT_TYPE: 'Dev',
@@ -104,7 +110,11 @@ describe('AccountSericeConfig', () => {
     });
 
     it('invalid graph environment dev config should fail', async () => {
-      const { ACCOUNT_ENVIRONMENT_TYPE: dummy, ACCOUNT_ENVIRONMENT_DEV_CONFIG: dummy2, ...env } = ALL_ENV;
+      const {
+        ACCOUNT_ENVIRONMENT_TYPE: dummy,
+        ACCOUNT_ENVIRONMENT_DEV_CONFIG: dummy2,
+        ...env
+      } = ALL_ENV;
       await expect(
         setupConfigService({
           ACCOUNT_ENVIRONMENT_TYPE: 'Dev',

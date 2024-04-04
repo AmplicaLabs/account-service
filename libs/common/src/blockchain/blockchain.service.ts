@@ -4,11 +4,22 @@ import { ApiPromise, ApiRx, HttpProvider, WsProvider } from '@polkadot/api';
 import { firstValueFrom, from } from 'rxjs';
 import { options } from '@frequency-chain/api-augment';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { BlockHash, BlockNumber, DispatchError, DispatchInfo, Hash, SignedBlock } from '@polkadot/types/interfaces';
+import {
+  BlockHash,
+  BlockNumber,
+  DispatchError,
+  DispatchInfo,
+  Hash,
+  SignedBlock,
+} from '@polkadot/types/interfaces';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { AnyNumber, ISubmittableResult, RegistryError } from '@polkadot/types/types';
 import { u32, Option, u128, u16 } from '@polkadot/types';
-import { PalletCapacityCapacityDetails, PalletCapacityEpochInfo, PalletSchemasSchema } from '@polkadot/types/lookup';
+import {
+  PalletCapacityCapacityDetails,
+  PalletCapacityEpochInfo,
+  PalletSchemasSchema,
+} from '@polkadot/types/lookup';
 import { ConfigService } from '../config/config.service';
 import { Extrinsic } from './extrinsic';
 
@@ -118,7 +129,9 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
   }
 
   public query(pallet: string, extrinsic: string, ...args: (any | undefined)[]): Promise<any> {
-    return args ? this.apiPromise.query[pallet][extrinsic](...args) : this.apiPromise.query[pallet][extrinsic]();
+    return args
+      ? this.apiPromise.query[pallet][extrinsic](...args)
+      : this.apiPromise.query[pallet][extrinsic]();
   }
 
   public async queryAt(
@@ -163,7 +176,10 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     currentEpoch: bigint;
   }> {
     const providerU64 = this.api.createType('u64', providerId);
-    const { epochStart }: PalletCapacityEpochInfo = await this.query('capacity', 'currentEpochInfo');
+    const { epochStart }: PalletCapacityEpochInfo = await this.query(
+      'capacity',
+      'currentEpochInfo',
+    );
     const epochBlockLength: u32 = await this.query('capacity', 'epochLength');
     const capacityDetailsOption: Option<PalletCapacityCapacityDetails> = await this.query(
       'capacity',
@@ -182,9 +198,13 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
       currentBlockNumber: currentBlock.toNumber(),
       nextEpochStart: epochStart.add(epochBlockLength).toNumber(),
       remainingCapacity:
-        typeof remainingCapacity === 'number' ? BigInt(remainingCapacity) : remainingCapacity.toBigInt(),
+        typeof remainingCapacity === 'number'
+          ? BigInt(remainingCapacity)
+          : remainingCapacity.toBigInt(),
       totalCapacityIssued:
-        typeof totalCapacityIssued === 'number' ? BigInt(totalCapacityIssued) : totalCapacityIssued.toBigInt(),
+        typeof totalCapacityIssued === 'number'
+          ? BigInt(totalCapacityIssued)
+          : totalCapacityIssued.toBigInt(),
     };
   }
 
@@ -194,7 +214,10 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
   }
 
   public async getCurrentCapacityEpochStart(): Promise<u32> {
-    const currentEpochInfo: PalletCapacityEpochInfo = await this.query('capacity', 'currentEpochInfo');
+    const currentEpochInfo: PalletCapacityEpochInfo = await this.query(
+      'capacity',
+      'currentEpochInfo',
+    );
     return currentEpochInfo.epochStart;
   }
 
@@ -223,7 +246,9 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     }>[] = blockList.map(async (blockNumber) => {
       const blockHash = await this.getBlockHash(blockNumber);
       const block = await this.getBlock(blockHash);
-      const txInfo = block.block.extrinsics.find((extrinsic) => extrinsic.hash.toString() === txHash.toString());
+      const txInfo = block.block.extrinsics.find(
+        (extrinsic) => extrinsic.hash.toString() === txHash.toString(),
+      );
 
       if (!txInfo) {
         return { found: false, success: false };
@@ -257,7 +282,9 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
 
           // check custom success events
           if (
-            successEvents.find((successEvent) => successEvent.pallet === eventName && successEvent.event === method)
+            successEvents.find(
+              (successEvent) => successEvent.pallet === eventName && successEvent.event === method,
+            )
           ) {
             this.logger.debug(`Found success event ${eventName} ${method}`);
             isTxSuccess = true;

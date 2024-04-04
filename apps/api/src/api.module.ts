@@ -12,7 +12,7 @@ import { ApiService } from './services/api.service';
 import { ConfigModule } from '../../../libs/common/src/config/config.module';
 import { ConfigService } from '../../../libs/common/src/config/config.service';
 import { BlockchainModule } from '../../../libs/common/src/blockchain/blockchain.module';
-import { QueueConstants } from '../../../libs/common/src';
+import { NonceService, QueueConstants } from '../../../libs/common/src';
 import { AccountsService } from './services/accounts.service';
 
 @Module({
@@ -115,7 +115,7 @@ import { AccountsService } from './services/accounts.service';
     }),
     ScheduleModule.forRoot(),
   ],
-  providers: [ApiService, AccountsService, ConfigService],
+  providers: [ApiService, AccountsService, ConfigService, NonceService],
   controllers: [ApiController, AccountsController],
   exports: [],
 })
