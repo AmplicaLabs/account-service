@@ -224,13 +224,13 @@
         }
       }
     },
-    "/keys/{msaId}": {
+    "/keys/{dsnpId}": {
       "post": {
         "operationId": "createKeys",
         "summary": "Create new control keys for an MSA ID.",
         "parameters": [
           {
-            "name": "msaId",
+            "name": "dsnpId",
             "in": "path",
             "required": true,
             "schema": {
@@ -259,7 +259,7 @@
         "summary": "Get all control keys associated with an MSA ID.",
         "parameters": [
           {
-            "name": "msaId",
+            "name": "dsnpId",
             "in": "path",
             "required": true,
             "schema": {
@@ -310,7 +310,7 @@
         }
       }
     },
-    "/profiles/{msaId}": {
+    "/profiles/{dsnpId}": {
       "post": {
         "operationId": "createProfile",
         "summary": "Creates a new profile from a DSNP Identity",
@@ -350,7 +350,7 @@
         ],
         "parameters": [
           {
-            "name": "msaId",
+            "name": "dsnpId",
             "in": "path",
             "required": true,
             "schema": {
@@ -384,7 +384,7 @@
         ],
         "parameters": [
           {
-            "name": "msaId",
+            "name": "dsnpId",
             "in": "path",
             "required": true,
             "schema": {
@@ -461,15 +461,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "addProviderSignature",
-          "algo",
-          "baseHandle",
-          "encoding",
-          "expiration",
-          "handleSignature",
-          "publicKey"
-        ]
+        "required": ["addProviderSignature", "algo", "baseHandle", "encoding", "expiration", "handleSignature", "publicKey"]
       },
       "CreateProviderAccountRequest": {
         "type": "object",
@@ -524,14 +516,14 @@
       "AuthAccountResponse": {
         "type": "object",
         "properties": {
-          "msaId": {
+          "dsnpId": {
             "type": "string"
           },
           "handle": {
             "type": "string"
           }
         },
-        "required": ["msaId"]
+        "required": ["dsnpId"]
       },
       "CreateDelegationRequest": {
         "type": "object",
@@ -658,16 +650,16 @@
       "KeysResponse": {
         "type": "array",
         "properties": {
-          "msaId": {
+          "dsnpId": {
             "type": "string"
           },
           "keys": {
             "type": "string"
           }
         },
-        "required": ["msaId", "keys"],
+        "required": ["dsnpId", "keys"],
         "items": {
-          "type": "string"
+            "type": "string"
         }
       },
       "CreateProfileRequest": {
@@ -720,7 +712,7 @@
         },
         "required": ["fromId", "contentHash", "content", "timestamp"],
         "items": {
-          "type": "string"
+            "type": "string"
         }
       }
     }

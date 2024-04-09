@@ -99,33 +99,7 @@ The DSNP Gateway Account Services Prototype API is designed for managing DSNP id
 - **Description**: Successful response of account.
 - **Schema**: [HandlesResponse](#handlesresponse)
 
-### 6. Change Handle
-
-- **Endpoint**: `/handles/change`
-- **Method**: `POST`
-- **Summary**: Remove a handle then add the new one.
-
-#### Request Body
-
-- **Schema**: [HandlesRequest](#handlesrequest)
-
-### 7. Remove Handle
-
-- **Endpoint**: `/handles/remove`
-- **Method**: `POST`
-- **Summary**: Remove a handle.
-
-#### Request Body
-
-- **Schema**: [HandlesRequest](#handlesrequest)
-
-#### Response
-
-- **Status Code**: `200 OK`
-- **Description**: Successful response of account.
-- **Schema**: [HandlesResponse](#handlesresponse)
-
-### 8. Get Handles
+### 6. Get Handles
 
 - **Endpoint**: `/handles`
 - **Method**: `GET`
@@ -140,7 +114,7 @@ The DSNP Gateway Account Services Prototype API is designed for managing DSNP id
 - **Status Code**: `200 OK`
 - **Schema**: [HandlesResponse](#handlesresponse)
 
-### 9. Create Delegation
+### 7. Create Delegation
 
 - **Endpoint**: `/delegation`
 - **Method**: `POST`
@@ -158,7 +132,7 @@ The DSNP Gateway Account Services Prototype API is designed for managing DSNP id
 - **Status Code**: `200 OK`
 - **Schema**: [CreateDelegationResponse](#createdelegationresponse)
 
-### 10. Get Delegation
+### 8. Get Delegation
 
 - **Endpoint**: `/delegation`
 - **Method**: `GET`
@@ -169,7 +143,7 @@ The DSNP Gateway Account Services Prototype API is designed for managing DSNP id
 - **Status Code**: `200 OK`
 - **Schema**: [DelegationResponse](#delegationresponse)
 
-### 11. Create Keys
+### 9. Create Keys
 
 - **Endpoint**: `/keys/:msaId`
 - **Method**: `POST`
@@ -189,7 +163,7 @@ The DSNP Gateway Account Services Prototype API is designed for managing DSNP id
 - **Status Code**: `200 OK`
 - **Schema**: [KeysResponse](#keysresponse)
 
-### 12. Get Keys
+### 10. Get Keys
 
 - **Endpoint**: `/keys/:msaId`
 - **Method**: `GET`
@@ -209,7 +183,7 @@ The DSNP Gateway Account Services Prototype API is designed for managing DSNP id
 - **Status Code**: `200 OK`
 - **Schema**: [KeysResponse](#keysresponse)
 
-### 13. Get Profiles
+### 11. Get Profiles
 
 - **Endpoint**: `/profiles`
 - **Method**: `GET`
@@ -224,7 +198,7 @@ The DSNP Gateway Account Services Prototype API is designed for managing DSNP id
 - **Status Code**: `200 OK`
 - **Schema**: [ProfilesResponse](#profilesresponse)
 
-### 14. Create Profile
+### 12. Create Profile
 
 - **Endpoint**: `/profiles/:msaId`
 - **Method**: `POST`
@@ -248,7 +222,7 @@ The DSNP Gateway Account Services Prototype API is designed for managing DSNP id
 - **Status Code**: `200 OK`
 - **Schema**: [ProfilesResponse](#profilesresponse)
 
-### 15. Get Profile
+### 13. Get Profile
 
 - **Endpoint**: `/profiles/:msaId`
 - **Method**: `GET`
@@ -269,7 +243,7 @@ The DSNP Gateway Account Services Prototype API is designed for managing DSNP id
 - **Status Code**: `200 OK`
 - **Schema**: [ProfilesResponse](#profilesresponse)
 
-### 16. Create/Edit Profile
+### 14. Create/Edit Profile
 
 - **Endpoint**: `/profiles/:msaId`
 - **Method**: `PUT`
