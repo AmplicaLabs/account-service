@@ -18,7 +18,7 @@ import { u32, Option, u128, u16 } from '@polkadot/types';
 import {
   PalletCapacityCapacityDetails,
   PalletCapacityEpochInfo,
-  PalletSchemasSchema,
+  PalletSchemasSchemaInfo,
 } from '@polkadot/types/lookup';
 import { ConfigService } from '../config/config.service';
 import { Extrinsic } from './extrinsic';
@@ -148,10 +148,10 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     return this.rpc('system', 'accountNextIndex', account);
   }
 
-  public async getSchema(schemaId: number): Promise<PalletSchemasSchema> {
-    const schema: PalletSchemasSchema = await this.query('schemas', 'schemas', schemaId);
-    return schema;
-  }
+  // public async getSchema(schemaId: number): Promise<PalletSchemasSchema> {
+  //   const schema: PalletSchemasSchema = await this.query('schemas', 'schemas', schemaId);
+  //   return schema;
+  // }
 
   public async getMsaIdMax() {
     const count = await this.query('msa', 'currentMsaIdentifierMaximum');

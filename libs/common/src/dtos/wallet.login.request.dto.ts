@@ -54,14 +54,12 @@ export class WalletLoginRequestDTO {
     description: 'The public',
   })
   signUp: {
-    extrinsics: [
-      {
-        pallet: string;
-        extrinsicName: string;
-        encodedExtrinsic: string;
-      },
-    ];
-    error: {
+    extrinsics: {
+      pallet: string;
+      extrinsicName: string;
+      encodedExtrinsic: string;
+    }[];
+    error?: {
       message: string;
     };
   };

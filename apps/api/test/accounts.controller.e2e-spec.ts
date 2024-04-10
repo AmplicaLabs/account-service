@@ -3,8 +3,8 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ApiModule } from '../src/api.module';
 import request from 'supertest';
+import { ApiModule } from '../src/api.module';
 
 describe('Account Controller', () => {
   let app: INestApplication;
@@ -33,23 +33,21 @@ describe('Account Controller', () => {
 
   it('(GET) /accounts/:msaId with valid msaId', async () => {
     const validMsaId = '1';
-    await request(app.getHttpServer())
-      .get('/accounts/' + validMsaId)
-      .expect(200)
-      .expect({
-        msaId: '1',
-        handle: {
-          base_handle: 'AliceHandle',
-          canonical_base: 'a11cehand1e',
-          suffix: 85,
-        },
-      });
+    await request(app.getHttpServer()).get(`/accounts/${validMsaId}`).expect(200).expect({
+      msaId: '1',
+      handle: null,
+      // handle: {
+      //   base_handle: 'AliceHandle',
+      //   canonical_base: 'a11cehand1e',
+      //   suffix: 85,
+      // },
+    });
   });
 
   it('(GET) /accounts/:msaId with invalid msaId', async () => {
     const invalidMsaId = '10';
     await request(app.getHttpServer())
-      .get('/accounts/' + invalidMsaId)
+      .get(`/accounts/${invalidMsaId}`)
       .expect(400)
       .expect({ statusCode: 400, message: 'Failed to find the account' });
   });

@@ -56,6 +56,7 @@ export class ApiController {
   async signInWithFrequency(@Body() walletLoginRequestDTO: WalletLoginRequestDTO): Promise<WalletLoginResponseDTO> {
     try {
       this.logger.log('Received sign in request');
+      this.logger.debug(`walletLoginRequestDTO: ${JSON.stringify(walletLoginRequestDTO)}`);
       const loginResponse = await this.apiService.signInWithFrequency(walletLoginRequestDTO);
       // REMOVE:
       return loginResponse;

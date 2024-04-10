@@ -5,7 +5,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { createHash, randomUUID } from 'crypto';
 import { MessageSourceId } from '@frequency-chain/api-augment/interfaces';
-// import { validateSignin, validateSignup } from '@amplica-labs/siwf';
+import { validateSignin, validateSignup } from '@amplica-labs/siwf';
 
 import { NonceService, QueueConstants } from '../../../../libs/common/src';
 import { ConfigService } from '../../../../libs/common/src/config/config.service';
@@ -13,7 +13,6 @@ import { BlockchainService } from '../../../../libs/common/src/blockchain/blockc
 import { WalletLoginResponseDTO } from '../../../../libs/common/src/dtos/wallet.login.response.dto';
 import { WalletLoginRequestDTO } from '../../../../libs/common/src/dtos/wallet.login.request.dto';
 import { createKeys } from '../../../../libs/common/src/blockchain/create-keys';
-
 
 export type RequestAccount = { publicKey: string; msaId?: string };
 // uuid auth token to Public Key
@@ -45,6 +44,7 @@ export class ApiService implements OnApplicationShutdown {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   createAuthToken = async (publicKey: string): Promise<string> => {
     // REMOVE: ???
     // const api = await this.blockchainService.getApi();
@@ -65,10 +65,10 @@ export class ApiService implements OnApplicationShutdown {
     const providerId = this.configService.getProviderId();
     if (request.signUp) {
       try {
-        const siwf = await import('@amplica-labs/siwf');
-        console.log('siwf', siwf);
+        // const siwf = await import('@amplica-labs/siwf');
+        // console.log('siwf', siwf);
 
-        const { calls, publicKey } = await siwf.validateSignup(api, request.signUp, providerId);
+        const { calls, publicKey } = await validateSignup(api, request.signUp, providerId);
         const txns = calls?.map((x) => api.tx(x.encodedExtrinsic));
         const callVec = api.createType('Vec<Call>', txns);
         const nonce = await this.nonceService.getNextNonce();
@@ -95,8 +95,7 @@ export class ApiService implements OnApplicationShutdown {
       }
     } else if (request.signIn) {
       try {
-        const siwf = await import('@amplica-labs/siwf');
-        const parsedSignin = await siwf.validateSignin(api, request.signIn, 'localhost');
+        const parsedSignin = await validateSignin(api, request.signIn, 'localhost');
         const accessToken = await this.createAuthToken(parsedSignin.publicKey);
         const expires = Date.now() + 60 * 60 * 24;
       } catch (e) {
