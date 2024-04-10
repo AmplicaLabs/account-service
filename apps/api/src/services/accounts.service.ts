@@ -5,10 +5,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { QueueConstants } from '../../../../libs/common/src';
 import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
-import {
-  AccountResponse,
-  CreateUserAccountRequest,
-} from '../../../../libs/common/src/dtos/accounts.dto';
+import { AccountResponse, CreateUserAccountRequest } from '../../../../libs/common/src/dtos/accounts.dto';
 import { ConfigService } from '../../../../libs/common/src/config/config.service';
 import { AccountChangeType } from '../../../../libs/common/src/dtos/account.change.notification.dto';
 
@@ -47,9 +44,7 @@ export class AccountsService {
   //     };
   //   }
 
-  async createUserAccount(
-    createUserAccountRequest: CreateUserAccountRequest,
-  ): Promise<AccountResponse | any> {
+  async createUserAccount(createUserAccountRequest: CreateUserAccountRequest): Promise<AccountResponse | any> {
     // TODO: figure out how we want to handle creating accounts in relation to siwf.
     const job = await this.accountChangePublishQueue.add('Create Account', {
       createUserAccountRequest,

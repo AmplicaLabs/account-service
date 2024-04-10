@@ -145,13 +145,9 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
       const blockDelay = SECONDS_PER_BLOCK * MILLISECONDS_PER_SECOND;
 
       this.logger.debug(`Adding job to transaction change notify queue: ${txMonitorJob.id}`);
-      this.accountChangeNotifyQueue.add(
-        `Transaction Change Notify Job - ${txMonitorJob.id}`,
-        txMonitorJob,
-        {
-          delay: blockDelay,
-        },
-      );
+      this.accountChangeNotifyQueue.add(`Transaction Change Notify Job - ${txMonitorJob.id}`, txMonitorJob, {
+        delay: blockDelay,
+      });
     } catch (error: any) {
       this.logger.error(error);
       throw error;

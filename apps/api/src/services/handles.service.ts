@@ -30,10 +30,7 @@ export class HandlesService {
     return createHash('sha1').update(stringVal).digest('base64url');
   }
 
-  async enqueueRequest(
-    request: HandlesRequest,
-    type: AccountChangeType,
-  ): Promise<AccountChangeRepsonseDto> {
+  async enqueueRequest(request: HandlesRequest, type: AccountChangeType): Promise<AccountChangeRepsonseDto> {
     const providerId = this.configService.getProviderId();
     const data = {
       ...request,
@@ -42,11 +39,9 @@ export class HandlesService {
       referenceId: this.calculateJobId(request),
     };
 
-    const job = await this.accountChangePublishQueue.add(
-      `Transaction Job - ${data.referenceId}`,
-      data,
-      { jobId: data.referenceId },
-    );
+    const job = await this.accountChangePublishQueue.add(`Transaction Job - ${data.referenceId}`, data, {
+      jobId: data.referenceId,
+    });
     this.logger.log('Job enqueued: ', JSON.stringify(job));
     return {
       referenceId: data.referenceId,

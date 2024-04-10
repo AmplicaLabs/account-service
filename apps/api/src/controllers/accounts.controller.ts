@@ -1,20 +1,7 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Param,
-  HttpException,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, HttpCode, HttpStatus, Logger, Param, HttpException } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AccountsService } from '../services/accounts.service';
-import {
-  AccountResponse,
-  CreateUserAccountRequest,
-} from '../../../../libs/common/src/dtos/accounts.dto';
+import { AccountResponse, CreateUserAccountRequest } from '../../../../libs/common/src/dtos/accounts.dto';
 
 @Controller('accounts')
 @ApiTags('accounts')
@@ -37,13 +24,9 @@ export class AccountsController {
    * @returns A promise that resolves to an array of AccountDTO objects representing the created accounts.
    * @throws An error if the account creation fails.
    */
-  async createAccount(
-    @Body() createUserAccountRequest: CreateUserAccountRequest,
-  ): Promise<AccountResponse> {
+  async createAccount(@Body() createUserAccountRequest: CreateUserAccountRequest): Promise<AccountResponse> {
     try {
-      this.logger.debug(
-        `Creating account with request: ${JSON.stringify(createUserAccountRequest)}`,
-      );
+      this.logger.debug(`Creating account with request: ${JSON.stringify(createUserAccountRequest)}`);
       const account = this.accountsService.createUserAccount(createUserAccountRequest);
       return account;
     } catch (error) {

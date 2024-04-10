@@ -67,12 +67,6 @@ import { TxnNotifierModule } from './account_notifier/account.monitor.processor.
     AccountUpdatePublisherModule,
     TxnNotifierModule,
   ],
-  providers: [
-    ConfigService,
-    AccountUpdatePublisherService,
-    TxnNotifierService,
-    ProviderWebhookService,
-    NonceService,
-  ],
+  providers: [ConfigService, AccountUpdatePublisherService, TxnNotifierService, ProviderWebhookService, NonceService],
 })
 export class WorkerModule {}

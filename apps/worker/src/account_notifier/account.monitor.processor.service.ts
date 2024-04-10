@@ -35,8 +35,7 @@ export class TxnNotifierService extends BaseConsumer {
       const previousKnownBlockNumber = (
         await this.blockchainService.getBlock(job.data.lastFinalizedBlockHash)
       ).block.header.number.toBigInt();
-      const currentFinalizedBlockNumber =
-        await this.blockchainService.getLatestFinalizedBlockNumber();
+      const currentFinalizedBlockNumber = await this.blockchainService.getLatestFinalizedBlockNumber();
       const blockList: bigint[] = [];
 
       for (
@@ -46,11 +45,9 @@ export class TxnNotifierService extends BaseConsumer {
       ) {
         blockList.push(i);
       }
-      const txResult = await this.blockchainService.crawlBlockListForTx(
-        job.data.txHash,
-        blockList,
-        [{ pallet: 'system', event: 'ExtrinsicSuccess' }],
-      );
+      const txResult = await this.blockchainService.crawlBlockListForTx(job.data.txHash, blockList, [
+        { pallet: 'system', event: 'ExtrinsicSuccess' },
+      ]);
       if (!txResult.found) {
         this.logger.error(`Tx ${job.data.txHash} not found in block list`);
         throw new Error(`Tx ${job.data.txHash} not found in block list`);
@@ -63,16 +60,12 @@ export class TxnNotifierService extends BaseConsumer {
           if (errorReport.retry) {
             // await this.retryRequestJob(job.data.referencePublishJob.referenceId);
           } else {
-            throw new Error(
-              `Job ${job.data.id} failed with error ${JSON.stringify(txResult.error)}`,
-            );
+            throw new Error(`Job ${job.data.id} failed with error ${JSON.stringify(txResult.error)}`);
           }
         }
 
         if (txResult.success) {
-          this.logger.verbose(
-            `Successfully found ${job.data.txHash} found in block ${txResult.blockHash}`,
-          );
+          this.logger.verbose(`Successfully found ${job.data.txHash} found in block ${txResult.blockHash}`);
           const webhookList = await this.getWebhookList(job.data.providerId);
           this.logger.debug(`Found ${webhookList.length} webhooks for ${job.data.providerId}`);
           // const requestJob: Job<ProviderGraphUpdateJob, any, string> | undefined =
@@ -157,9 +150,7 @@ export class TxnNotifierService extends BaseConsumer {
     }
   }
 
-  private async handleMessagesFailure(
-    moduleError: RegistryError,
-  ): Promise<{ pause: boolean; retry: boolean }> {
+  private async handleMessagesFailure(moduleError: RegistryError): Promise<{ pause: boolean; retry: boolean }> {
     try {
       switch (moduleError.method) {
         case 'StalePageState':
