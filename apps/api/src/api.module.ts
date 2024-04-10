@@ -14,6 +14,8 @@ import { ConfigService } from '../../../libs/common/src/config/config.service';
 import { BlockchainModule } from '../../../libs/common/src/blockchain/blockchain.module';
 import { NonceService, QueueConstants } from '../../../libs/common/src';
 import { AccountsService } from './services/accounts.service';
+import { HandlesService } from './services/handles.service';
+import { HandlesController } from './controllers/handles.controller';
 
 @Module({
   imports: [
@@ -72,17 +74,9 @@ import { AccountsService } from './services/accounts.service';
     }),
     BullModule.registerQueue(
       {
-        name: QueueConstants.ACCOUNT_CHANGE_REQUEST_QUEUE,
-        defaultJobOptions: {
-          removeOnComplete: false,
-          removeOnFail: false,
-          attempts: 3,
-        },
-      },
-      {
         name: QueueConstants.ACCOUNT_CHANGE_PUBLISH_QUEUE,
         defaultJobOptions: {
-          removeOnComplete: true,
+          removeOnComplete: 20,
           removeOnFail: false,
           attempts: 1,
         },
@@ -90,7 +84,7 @@ import { AccountsService } from './services/accounts.service';
       {
         name: QueueConstants.ACCOUNT_CHANGE_NOTIFY_QUEUE,
         defaultJobOptions: {
-          removeOnComplete: true,
+          removeOnComplete: 20,
           removeOnFail: false,
           attempts: 3,
         },
@@ -102,10 +96,6 @@ import { AccountsService } from './services/accounts.service';
       adapter: ExpressAdapter,
     }),
     BullBoardModule.forFeature({
-      name: QueueConstants.ACCOUNT_CHANGE_REQUEST_QUEUE,
-      adapter: BullMQAdapter,
-    }),
-    BullBoardModule.forFeature({
       name: QueueConstants.ACCOUNT_CHANGE_PUBLISH_QUEUE,
       adapter: BullMQAdapter,
     }),
@@ -115,8 +105,8 @@ import { AccountsService } from './services/accounts.service';
     }),
     ScheduleModule.forRoot(),
   ],
-  providers: [ApiService, AccountsService, ConfigService, NonceService],
-  controllers: [ApiController, AccountsController],
+  providers: [ApiService, AccountsService, HandlesService, ConfigService, NonceService],
+  controllers: [ApiController, AccountsController, HandlesController],
   exports: [],
 })
 export class ApiModule {}

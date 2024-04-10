@@ -14,6 +14,9 @@ import { QueueConstants, NonceService } from '../../../../libs/common/src';
 import { BaseConsumer } from '../BaseConsumer';
 import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
 import { createKeys } from '../../../../libs/common/src/blockchain/create-keys';
+import { Extrinsic } from '../../../../libs/common/src/blockchain/extrinsic';
+import { ITxMonitorJob } from '../../../../libs/common/src/dtos/account.notifier.job';
+import { AccountChangeType } from '../../../../libs/common/src/dtos/account.change.notification.dto';
 
 export const SECONDS_PER_BLOCK = 12;
 const CAPACITY_EPOCH_TIMEOUT_NAME = 'capacity_check';
@@ -56,61 +59,99 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
    * @returns A promise that resolves when the job is processed.
    */
   async process(job: Job<any, any, string>): Promise<any> {
-    let statefulStorageTxHash: Hash = {} as Hash;
+    let accountTxnHash: Hash = {} as Hash;
+
     try {
-      this.logger.log(`Processing job ${job.id} of type ${job.name}`);
+      this.logger.log(`Processing job ${job.id} of type ${job.name}.... ${JSON.stringify(job)}`);
       const lastFinalizedBlockHash = await this.blockchainService.getLatestFinalizedBlockHash();
       const currentCapacityEpoch = await this.blockchainService.getCurrentCapacityEpoch();
-      switch (job.data.update.type) {
-        case 'PersistPage': {
-          let payloadData: number[] = [];
-          if (typeof job.data.update.payload === 'object' && 'data' in job.data.update.payload) {
-            payloadData = Array.from((job.data.update.payload as { data: Uint8Array }).data);
-          }
-          const providerKeys = createKeys(this.configService.getProviderAccountSeedPhrase());
-          const tx = this.blockchainService.createExtrinsicCall(
-            { pallet: 'statefulStorage', extrinsic: 'upsertPage' },
-            job.data.update.ownerDsnpUserId,
-            job.data.update.schemaId,
-            job.data.update.pageId,
-            job.data.update.prevHash,
-            payloadData,
-          );
-          statefulStorageTxHash = await this.processSingleBatch(providerKeys, tx);
+      const providerKeys = createKeys(this.configService.getProviderAccountSeedPhrase());
+      let tx: SubmittableExtrinsic<any>;
+      // TODO: Fix createSponsoredAccountWithDelegation or use siwf. TBD.
+      switch (job.data.type) {
+        case AccountChangeType.CREATE_HANDLE: {
+          tx = await this.blockchainService.claimHandle(job.data.accountId, job.data.baseHandle, [
+            job.data.providerId,
+            job.data.payload,
+          ]);
           break;
         }
-        case 'DeletePage': {
-          const providerKeys = createKeys(this.configService.getProviderAccountSeedPhrase());
-          const tx = this.blockchainService.createExtrinsicCall(
-            { pallet: 'statefulStorage', extrinsic: 'deletePage' },
-            job.data.update.ownerDsnpUserId,
-            job.data.update.schemaId,
-            job.data.update.pageId,
-            job.data.update.prevHash,
-          );
-          statefulStorageTxHash = await this.processSingleBatch(providerKeys, tx);
+        case AccountChangeType.CHANGE_HANDLE: {
+          tx = await this.blockchainService.changeHandle(job.data.accountId, job.data.baseHandle, [
+            job.data.providerId,
+            job.data.payload,
+          ]);
           break;
         }
-        default:
+        case AccountChangeType.CREATE_ACCOUNT: {
+          tx = await this.blockchainService.createSponsoredAccountWithDelegation(
+            job.data.publicKey,
+            job.data.signature,
+            null,
+          );
           break;
+        }
+        default: {
+          throw new Error('Invalid job name');
+        }
       }
+      accountTxnHash = await this.processSingleBatch(providerKeys, tx);
+      this.logger.debug(`tx: ${tx}`);
+      //   switch (job.data.update.type) {
+      //     case 'PersistPage': {
+      //       let payloadData: number[] = [];
+      //       if (typeof job.data.update.payload === 'object' && 'data' in job.data.update.payload) {
+      //         payloadData = Array.from((job.data.update.payload as { data: Uint8Array }).data);
+      //       }
+      //       const providerKeys = createKeys(this.configService.getProviderAccountSeedPhrase());
+      //       const tx = this.blockchainService.createExtrinsicCall(
+      //         { pallet: 'statefulStorage', extrinsic: 'upsertPage' },
+      //         job.data.update.ownerDsnpUserId,
+      //         job.data.update.schemaId,
+      //         job.data.update.pageId,
+      //         job.data.update.prevHash,
+      //         payloadData,
+      //       );
+      //       accountTxnHash = await this.processSingleBatch(providerKeys, tx);
+      //       break;
+      //     }
+      //     case 'DeletePage': {
+      //       const providerKeys = createKeys(this.configService.getProviderAccountSeedPhrase());
+      //       const tx = this.blockchainService.createExtrinsicCall(
+      //         { pallet: 'statefulStorage', extrinsic: 'deletePage' },
+      //         job.data.update.ownerDsnpUserId,
+      //         job.data.update.schemaId,
+      //         job.data.update.pageId,
+      //         job.data.update.prevHash,
+      //       );
+      //       accountTxnHash = await this.processSingleBatch(providerKeys, tx);
+      //       break;
+      //     }
+      //     default:
+      //       break;
+      //   }
 
       this.logger.debug(`successful job: ${JSON.stringify(job, null, 2)}`);
 
-      // Add a job to the graph change notify queue
+      // Add a job to the account change notify queue
       // const txMonitorJob: ITxMonitorJob = {
-      //   id: job.data.referenceId,
-      //   txHash: statefulStorageTxHash,
-      //   epoch: currentCapacityEpoch.toString(),
-      //   lastFinalizedBlockHash,
-      //   referencePublishJob: job.data,
-      // };
+      const txMonitorJob = {
+        id: job.data.referenceId,
+        txHash: accountTxnHash,
+        epoch: currentCapacityEpoch.toString(),
+        lastFinalizedBlockHash,
+        referencePublishJob: job.data,
+      };
       const blockDelay = SECONDS_PER_BLOCK * MILLISECONDS_PER_SECOND;
 
-      // this.logger.debug(`Adding job to graph change notify queue: ${txMonitorJob.id}`);
-      // this.accountChangeNotifyQueue.add(`Account Change Notify Job - ${txMonitorJob.id}`, txMonitorJob, {
-      //   delay: blockDelay,
-      // });
+      this.logger.debug(`Adding job to transaction change notify queue: ${txMonitorJob.id}`);
+      this.accountChangeNotifyQueue.add(
+        `Transaction Change Notify Job - ${txMonitorJob.id}`,
+        txMonitorJob,
+        {
+          delay: blockDelay,
+        },
+      );
     } catch (error: any) {
       this.logger.error(error);
       throw error;

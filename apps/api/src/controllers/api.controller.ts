@@ -5,7 +5,7 @@ import { WalletLoginRequestDTO } from '../../../../libs/common/src/dtos/wallet.l
 import { ApiService } from '../services/api.service';
 
 @Controller('api')
-@ApiTags('account-service')
+@ApiTags('api')
 export class ApiController {
   private readonly logger: Logger;
 
@@ -83,7 +83,7 @@ export class ApiController {
 
   // @Put('watch-graphs')
   // @HttpCode(HttpStatus.OK)
-  // @ApiOperation({ summary: 'Watch graphs for specified dsnpIds and receive updates' })
+  // @ApiOperation({ summary: 'Watch graphs for specified msaIds and receive updates' })
   // @ApiOkResponse({ description: 'Successfully started watching graphs' })
   // @ApiBody({ type: WatchGraphsDto })
   // async watchGraphs(@Body() watchGraphsDto: WatchGraphsDto) {
