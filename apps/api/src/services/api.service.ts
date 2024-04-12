@@ -3,7 +3,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { createHash, randomUUID } from 'crypto';
+import { Hash, createHash, randomUUID } from 'crypto';
 import { MessageSourceId } from '@frequency-chain/api-augment/interfaces';
 import { validateSignin, validateSignup } from '@amplica-labs/siwf';
 
@@ -13,6 +13,7 @@ import { BlockchainService } from '../../../../libs/common/src/blockchain/blockc
 import { WalletLoginResponseDTO } from '../../../../libs/common/src/dtos/wallet.login.response.dto';
 import { WalletLoginRequestDTO } from '../../../../libs/common/src/dtos/wallet.login.request.dto';
 import { createKeys } from '../../../../libs/common/src/blockchain/create-keys';
+import { AccountChangeType } from '../../../../libs/common/src/dtos/account.change.notification.dto';
 
 export type RequestAccount = { publicKey: string; msaId?: string };
 // uuid auth token to Public Key
@@ -24,6 +25,8 @@ export class ApiService implements OnApplicationShutdown {
 
   constructor(
     @InjectRedis() private redis: Redis,
+    @InjectQueue(QueueConstants.ACCOUNT_CHANGE_PUBLISH_QUEUE)
+    private accountChangePublishQueue: Queue,
     private configService: ConfigService,
     private blockchainService: BlockchainService,
     private nonceService: NonceService,
@@ -44,9 +47,6 @@ export class ApiService implements OnApplicationShutdown {
 
   // eslint-disable-next-line class-methods-use-this
   createAuthToken = async (publicKey: string): Promise<string> => {
-    // REMOVE: ???
-    // const api = await this.blockchainService.getApi();
-
     const uuid = randomUUID();
     authTokenRegistry.set(uuid, { publicKey });
     return uuid;
@@ -61,30 +61,17 @@ export class ApiService implements OnApplicationShutdown {
   async signInWithFrequency(request: WalletLoginRequestDTO): Promise<WalletLoginResponseDTO> {
     const api = await this.blockchainService.getApi();
     const providerId = this.configService.getProviderId();
+    let response: WalletLoginResponseDTO;
     if (request.signUp) {
       try {
-        // const siwf = await import('@amplica-labs/siwf');
-        // console.log('siwf', siwf);
+        const payload = await validateSignup(api, request.signUp, providerId);
+        // Pass all this data to the transaction publisher queue
+        const referenceId = await this.enqueueRequest(payload, AccountChangeType.SIWF_SIGNUP);
 
-        const { calls, publicKey } = await validateSignup(api, request.signUp, providerId);
-        const txns = calls?.map((x) => api.tx(x.encodedExtrinsic));
-        const callVec = api.createType('Vec<Call>', txns);
-        const nonce = await this.nonceService.getNextNonce();
-        const providerKeys = createKeys(this.configService.getProviderAccountSeedPhrase());
-        api.tx.frequencyTxPayment
-          .payWithCapacityBatchAll(callVec)
-          .signAndSend(providerKeys, { nonce }, ({ status, dispatchError }) => {
-            if (dispatchError) {
-              this.logger.error(`Error in Signup: ${dispatchError.toHuman()}`);
-            } else if (status.isInBlock || status.isFinalized) {
-              console.log('Account signup processed', status.toHuman());
-            }
-          });
-        const response: WalletLoginResponseDTO = {
-          accessToken: await this.createAuthToken(publicKey),
+        response = {
+          accessToken: await this.createAuthToken(payload.publicKey),
           expires: Date.now() + 60 * 60 * 24,
-          msaId: '55',
-          handle: 'TestHandle',
+          referenceId: referenceId.toString(),
         };
         return response;
       } catch (e: any) {
@@ -95,42 +82,39 @@ export class ApiService implements OnApplicationShutdown {
       try {
         const parsedSignin = await validateSignin(api, request.signIn, 'localhost');
         const accessToken = await this.createAuthToken(parsedSignin.publicKey);
+        // TODO: expiration should be configurable
         const expires = Date.now() + 60 * 60 * 24;
+        response = {
+          accessToken,
+          expires,
+          msaId: parsedSignin.msaId,
+        };
+        return response;
       } catch (e) {
-        this.logger.error(`Error during signin: ${e}`);
-        throw new Error('Failed to sign in');
+        this.logger.error(`Error during SIWF signin request: ${e}`);
+        const { cause } = e as any;
+        this.logger.error(`cause: ${cause}`);
+        throw new Error('Failed to Sign-In With Frequency');
       }
     }
-
-    const response: WalletLoginResponseDTO = {
-      accessToken: 'accessToken',
-      expires: 3600,
-      msaId: '55',
-      handle: 'TestHandle',
-    };
-    return response;
+    throw new Error('Invalid Sign-In With Frequency Request');
   }
 
-  // async enqueueRequest(request: ProviderGraphDto): Promise<AccountChangeRepsonseDto> {
-  //   const providerId = this.configService.getProviderId();
-  //   const data: ProviderGraphUpdateJob = {
-  //     msaId: request.msaId,
-  //     providerId,
-  //     connections: request.connections.data,
-  //     graphKeyPairs: request.graphKeyPairs,
-  //     referenceId: this.calculateJobId(request),
-  //     updateConnection: this.configService.getReconnectionServiceRequired(),
-  //   };
-  //   const jobOld = await this.accountChangeRequestQueue.getJob(data.referenceId);
-  //   if (jobOld && (await jobOld.isCompleted())) {
-  //     await jobOld.remove();
-  //   }
-  //   const job = await this.accountChangeRequestQueue.add(`Request Job - ${data.referenceId}`, data, { jobId: data.referenceId });
-  //   this.logger.debug(job);
-  //   return {
-  //     referenceId: data.referenceId,
-  //   };
-  // }
+  async enqueueRequest(request, type: AccountChangeType): Promise<Hash> {
+    const providerId = this.configService.getProviderId();
+    const data = {
+      ...request,
+      type,
+      providerId,
+      referenceId: this.calculateJobId(request),
+    };
+
+    const job = await this.accountChangePublishQueue.add(`Transaction Job - ${data.referenceId}`, data, {
+      jobId: data.referenceId,
+    });
+    this.logger.debug(`job: ${job}`);
+    return data.referenceId;
+  }
 
   // async watchGraphs(watchGraphsDto: WatchGraphsDto): Promise<void> {
   //   watchGraphsDto.msaIds.forEach(async (msaId) => {
@@ -141,26 +125,9 @@ export class ApiService implements OnApplicationShutdown {
   //   });
   // }
 
-  // async getGraphs(queryParams: GraphsQueryParamsDto): Promise<UserGraphDto[]> {
-  //   const { msaIds, privacyType } = queryParams;
-  //   const graphKeyPairs = queryParams.graphKeyPairs || [];
-  //   const graphs: UserGraphDto[] = [];
-  //   // eslint-disable-next-line no-restricted-syntax
-  //   for (const msaId of msaIds) {
-  //     const dsnpUserId: MessageSourceId = this.blockchainService.api.registry.createType('MessageSourceId', msaId);
-  //     // eslint-disable-next-line no-await-in-loop
-  //     const graphEdges = await this.asyncDebouncerService.getGraphForMsaId(dsnpUserId, privacyType, graphKeyPairs);
-  //     graphs.push({
-  //       msaId,
-  //       dsnpGraphEdges: graphEdges,
-  //     });
-  //   }
-  //   return graphs;
-  // }
-
   // eslint-disable-next-line class-methods-use-this
-  // private calculateJobId(jobWithoutId: ProviderGraphDto): string {
-  //   const stringVal = JSON.stringify(jobWithoutId);
-  //   return createHash('sha1').update(stringVal).digest('base64url');
-  // }
+  private calculateJobId(jobWithoutId): string {
+    const stringVal = JSON.stringify(jobWithoutId);
+    return createHash('sha1').update(stringVal).digest('base64url');
+  }
 }

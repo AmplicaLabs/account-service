@@ -1,4 +1,6 @@
-import { IsNotEmpty } from 'class-validator';
+/* eslint-disable max-classes-per-file */
+import { EncodedExtrinsic } from '@amplica-labs/siwf';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class WalletLoginResponseDTO {
   @IsNotEmpty()
@@ -7,9 +9,18 @@ export class WalletLoginResponseDTO {
   @IsNotEmpty()
   expires: number;
 
-  @IsNotEmpty()
-  msaId: string;
+  @IsOptional()
+  referenceId?: string;
 
-  @IsNotEmpty()
-  handle: string;
+  @IsOptional()
+  msaId?: string;
+
+  // @IsNotEmpty()
+  // handle: string;
+}
+
+export class SIWFSignupRequest {
+  calls: EncodedExtrinsic[];
+
+  publicKey: string;
 }

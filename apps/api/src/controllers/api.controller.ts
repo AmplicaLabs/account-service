@@ -1,4 +1,4 @@
-import { Controller, Get, Post, HttpCode, HttpStatus, Logger, Query, Body, Put } from '@nestjs/common';
+import { Controller, Get, Post, HttpCode, HttpStatus, Logger, Query, Body, Put, HttpException } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WalletLoginResponseDTO } from '../../../../libs/common/src/dtos/wallet.login.response.dto';
 import { WalletLoginRequestDTO } from '../../../../libs/common/src/dtos/wallet.login.request.dto';
@@ -49,54 +49,22 @@ export class ApiController {
   }
 
   @Post('login')
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Request to sign in with Frequency' })
   @ApiOkResponse({ description: 'Signed in successfully', type: WalletLoginResponseDTO })
   @ApiBody({ type: WalletLoginRequestDTO })
-  async signInWithFrequency(@Body() walletLoginRequestDTO: WalletLoginRequestDTO): Promise<WalletLoginResponseDTO> {
+  async signInWithFrequency(
+    @Body() walletLoginRequestDTO: WalletLoginRequestDTO,
+  ): Promise<WalletLoginResponseDTO | Response> {
     try {
-      this.logger.log('Received sign in request');
+      this.logger.log('Received Sign-In With Frequency request');
       this.logger.debug(`walletLoginRequestDTO: ${JSON.stringify(walletLoginRequestDTO)}`);
       const loginResponse = await this.apiService.signInWithFrequency(walletLoginRequestDTO);
-      // REMOVE:
+      // return { status: 202, message: `SIWF in progress. referenceId: ${referenceId}`, data: loginResponse };
       return loginResponse;
     } catch (error) {
-      this.logger.error(error);
-      throw new Error('Failed to sign in with Frequency');
+      this.logger.error(`Failed to Sign In With Frequency: ${error}`);
+      throw new HttpException('Failed to Sign In With Frequency', HttpStatus.BAD_REQUEST);
     }
   }
-
-  // // Create a provider graph
-  // @Post('update-graph')
-  // @HttpCode(HttpStatus.CREATED)
-  // @ApiOperation({ summary: 'Request an update to given users graph' })
-  // @ApiCreatedResponse({ description: 'Graph update request created successfully', type: GraphChangeRepsonseDto })
-  // @ApiBody({ type: ProviderGraphDto })
-  // async updateGraph(@Body() providerGraphDto: ProviderGraphDto): Promise<GraphChangeRepsonseDto> {
-  //   try {
-  //     return await this.apiService.enqueueRequest(providerGraphDto);
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     throw new Error('Failed to update graph');
-  //   }
-  // }
-
-  // @Put('watch-graphs')
-  // @HttpCode(HttpStatus.OK)
-  // @ApiOperation({ summary: 'Watch graphs for specified msaIds and receive updates' })
-  // @ApiOkResponse({ description: 'Successfully started watching graphs' })
-  // @ApiBody({ type: WatchGraphsDto })
-  // async watchGraphs(@Body() watchGraphsDto: WatchGraphsDto) {
-  //   try {
-  //     // eslint-disable-next-line no-await-in-loop
-  //     await this.apiService.watchGraphs(watchGraphsDto);
-  //     return {
-  //       status: HttpStatus.OK,
-  //       data: 'Successfully started watching graphs',
-  //     };
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     throw new Error('Failed to watch graphs');
-  //   }
-  // }
 }

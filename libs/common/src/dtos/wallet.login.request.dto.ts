@@ -1,3 +1,4 @@
+import { SignInResponse, SignUpResponse } from '@amplica-labs/siwf';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
@@ -39,28 +40,8 @@ export class WalletLoginRequestDTO {
       },
     },
   })
-  signIn: {
-    siwsPayload: {
-      message: string;
-      signature: string;
-    };
-    error: {
-      message: string;
-    };
-  };
+  signIn: SignInResponse;
 
-  @ApiProperty({
-    example: '0x1234567890abcdef',
-    description: 'The public',
-  })
-  signUp: {
-    extrinsics: {
-      pallet: string;
-      extrinsicName: string;
-      encodedExtrinsic: string;
-    }[];
-    error?: {
-      message: string;
-    };
-  };
+  @ApiProperty()
+  signUp: SignUpResponse;
 }

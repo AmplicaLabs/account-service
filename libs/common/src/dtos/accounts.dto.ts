@@ -51,27 +51,23 @@ export class CreateUserAccountRequest {
 }
 
 // TODO: Create custom validation that makes sure that if there is a baseHandle, there also is a handleSignature value.
-export class CreateProviderAccountRequest {
-  @IsNotEmpty()
-  @IsEnum({ AlgoType })
-  algo: AlgoType;
+// export class CreateProviderAccountRequest {
+//   @IsOptional()
+//   baseHandle?: string;
 
-  @IsOptional()
-  baseHandle?: string;
+//   @IsOptional()
+//   handleSignature?: string;
 
-  @IsOptional()
-  handleSignature?: string;
+//   @IsNotEmpty()
+//   @IsHexadecimal()
+//   encoding: string;
 
-  @IsNotEmpty()
-  @IsHexadecimal()
-  encoding: string;
+//   @IsNotEmpty()
+//   expiration: number;
 
-  @IsNotEmpty()
-  expiration: number;
-
-  @IsNotEmpty()
-  publicKey: string;
-}
+//   @IsNotEmpty()
+//   publicKey: string;
+// }
 
 export class CreateAccountResponse {
   @IsNotEmpty()
