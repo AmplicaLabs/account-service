@@ -33,7 +33,7 @@ describe('Account Service E2E request verification!', () => {
   it('(GET) /api/health', () =>
     request(app.getHttpServer()).get('/api/health').expect(200).expect({ status: 200, message: 'Service is healthy' }));
 
-  describe('(POST) /api/login', () => {
+  describe('(POST) /accounts/login', () => {
     it('Sign Up With Frequency request should work', async () => {
       const siwfRequest: WalletLoginRequestDTO = {
         signIn: {},
@@ -56,7 +56,7 @@ describe('Account Service E2E request verification!', () => {
       };
 
       return request(app.getHttpServer())
-        .post(`/api/login`)
+        .post(`/accounts/login`)
         .send(siwfRequest)
         .expect(201)
         .expect((res) => expect(res.body.expires).toBeGreaterThan(Date.now()))
@@ -78,7 +78,7 @@ describe('Account Service E2E request verification!', () => {
       };
 
       return request(app.getHttpServer())
-        .post(`/api/login`)
+        .post(`/accounts/login`)
         .send(siwfRequest)
         .expect(201)
         .expect((res) => expect(res.body.expires).toBeGreaterThan(Date.now()))

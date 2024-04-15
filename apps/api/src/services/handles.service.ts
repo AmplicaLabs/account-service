@@ -2,27 +2,21 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
 import { InjectQueue } from '@nestjs/bullmq';
-import { QueueConstants } from '../../../../libs/common/src';
-import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
-import {
-  HandleRequest,
-  PublishHandleRequest,
-} from '../../../../libs/common/src/types/dtos/handles.dto';
 import { Queue } from 'bullmq';
-import { ConfigService } from '../../../../libs/common/src/config/config.service';
 import type { HandleResponse, MessageSourceId } from '@frequency-chain/api-augment/interfaces';
 import { createHash } from 'crypto';
-import {
-  TransactionData,
-  TransactionRepsonse,
-} from '../../../../libs/common/src/types/dtos/transaction.dto';
+import { QueueConstants } from '../../../../libs/common/src';
+import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
+import { HandleRequest, PublishHandleRequest } from '../../../../libs/common/src/types/dtos/handles.dto';
+import { ConfigService } from '../../../../libs/common/src/config/config.service';
+import { TransactionData, TransactionRepsonse } from '../../../../libs/common/src/types/dtos/transaction.dto';
 
 @Injectable()
 export class HandlesService {
   private readonly logger: Logger;
 
   constructor(
-    @InjectRedis() private redis: Redis,
+    // @InjectRedis() private redis: Redis,
     @InjectQueue(QueueConstants.TRANSACTION_PUBLISH_QUEUE)
     private transactionPublishQueue: Queue,
     private configService: ConfigService,
@@ -31,6 +25,7 @@ export class HandlesService {
     this.logger = new Logger(this.constructor.name);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   private calculateJobId(jobWithoutId: PublishHandleRequest): string {
     const stringVal = JSON.stringify(jobWithoutId);
     return createHash('sha1').update(stringVal).digest('base64url');
@@ -44,11 +39,9 @@ export class HandlesService {
       referenceId: this.calculateJobId(request),
     };
 
-    const job = await this.transactionPublishQueue.add(
-      `Transaction Job - ${data.referenceId}`,
-      data,
-      { jobId: data.referenceId },
-    );
+    const job = await this.transactionPublishQueue.add(`Transaction Job - ${data.referenceId}`, data, {
+      jobId: data.referenceId,
+    });
 
     this.logger.log('Job enqueued: ', JSON.stringify(job));
     return {
