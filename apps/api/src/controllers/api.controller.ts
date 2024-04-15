@@ -26,28 +26,6 @@ export class ApiController {
     };
   }
 
-  @Get('accounts')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Request to create a new account' })
-  @ApiOkResponse({ description: 'Account created successfully' })
-  // @ApiBody({ type: AccountDTO })
-  /**
-   * Creates an account using the provided query parameters.
-   * @param queryParams - The query parameters for creating the account.
-   * @returns A promise that resolves to an array of AccountDTO objects representing the created accounts.
-   * @throws An error if the account creation fails.
-   */
-  async createAccount(): Promise<String> {
-    try {
-      const account = await this.apiService.createAccount();
-      // REMOVE:
-      return account;
-    } catch (error) {
-      this.logger.error(error);
-      throw new Error('Failed to create account');
-    }
-  }
-
   @Post('login')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Request to sign in with Frequency' })
