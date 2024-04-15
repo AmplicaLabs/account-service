@@ -94,8 +94,6 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
             this.blockchainService.api.tx(x.encodedExtrinsic),
           );
           const callVec = this.blockchainService.createType('Vec<Call>', txns);
-          this.logger.debug(`callVec[0]: ${callVec[0].toHuman()}`);
-          this.logger.debug(`callVec[1]: ${callVec[1].toHuman()}`);
           accountTxnHash = await this.processBatchTxn(providerKeys, callVec);
           break;
         }
