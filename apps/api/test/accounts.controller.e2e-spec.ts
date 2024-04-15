@@ -26,13 +26,10 @@ describe('Account Controller', () => {
 
   it('(GET) /accounts/:msaId with valid msaId and no handle', async () => {
     const validMsaId = '2';
-    await request(app.getHttpServer())
-      .get('/accounts/' + validMsaId)
-      .expect(200)
-      .expect({
-        msaId: '2',
-        handle: null,
-      });
+    await request(app.getHttpServer()).get(`/accounts/${validMsaId}`).expect(200).expect({
+      msaId: '2',
+      handle: null,
+    });
   });
 
   it('(GET) /accounts/:msaId with invalid msaId', async () => {
@@ -46,7 +43,7 @@ describe('Account Controller', () => {
   it('(GET) /accounts/:msaId with valid msaId and handle', async () => {
     const validMsaId = 1;
     await request(app.getHttpServer())
-      .get('/accounts/' + validMsaId)
+      .get(`/accounts/${validMsaId}`)
       .expect(200)
       .expect((res) => res.body.msaId === '1')
       .expect((res) => res.body.handle.baseHandle === 'AliceHandle')
