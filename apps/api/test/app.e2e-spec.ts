@@ -17,12 +17,10 @@ describe('Account Service E2E request verification!', () => {
     module = await Test.createTestingModule({
       imports: [ApiModule],
     }).compile();
-    console.log(`****************************module: ${module}`);
 
     app = module.createNestApplication();
     const eventEmitter = app.get<EventEmitter2>(EventEmitter2);
     eventEmitter.on('shutdown', async () => {
-      console.log('eventEmitter:shutdown: Shutting down the app');
       await app.close();
     });
     app.useGlobalPipes(new ValidationPipe());

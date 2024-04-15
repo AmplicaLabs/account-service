@@ -74,7 +74,6 @@ export class TransactionPublisherService extends BaseConsumer implements OnAppli
           ]);
           accountTxnHash = await this.processSingleTxn(providerKeys, tx);
           this.logger.debug(`tx: ${tx}`);
-          this.logger.debug(`successful job: ${JSON.stringify(job, null, 2)}`);
           break;
         }
         case TransactionType.CHANGE_HANDLE: {
@@ -84,7 +83,6 @@ export class TransactionPublisherService extends BaseConsumer implements OnAppli
           ]);
           accountTxnHash = await this.processSingleTxn(providerKeys, tx);
           this.logger.debug(`tx: ${tx}`);
-          this.logger.debug(`successful job: ${JSON.stringify(job, null, 2)}`);
           break;
         }
         case TransactionType.SIWF_SIGNUP: {
@@ -95,14 +93,12 @@ export class TransactionPublisherService extends BaseConsumer implements OnAppli
           const callVec = this.blockchainService.createType('Vec<Call>', txns);
           accountTxnHash = await this.processBatchTxn(providerKeys, callVec);
           this.logger.debug(`txns: ${txns}`);
-          this.logger.debug(`successful job: ${JSON.stringify(job, null, 2)}`);
           break;
         }
         default: {
           throw new Error(`Invalid job type: ${job.data.type}`);
         }
       }
-
       this.logger.debug(`successful job: ${JSON.stringify(job, null, 2)}`);
 
       // Add a job to the account change notify queue
@@ -165,9 +161,6 @@ export class TransactionPublisherService extends BaseConsumer implements OnAppli
   }
 
   async processBatchTxn(providerKeys: KeyringPair, callVec: Codec): Promise<Hash> {
-    // this.logger.debug(
-    //   `Submitting tx of size ${tx.length}, nonce:${tx.nonce}, method: ${tx.method.section}.${tx.method.method}`,
-    // );
     this.logger.debug(`processBatchTxn: callVec: ${callVec.toHuman()}`);
     try {
       const ext = this.blockchainService.createExtrinsic(

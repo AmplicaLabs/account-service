@@ -47,7 +47,6 @@ export class AccountsController {
       this.logger.log('Received Sign-In With Frequency request');
       this.logger.debug(`walletLoginRequestDTO: ${JSON.stringify(walletLoginRequestDTO)}`);
       const loginResponse = await this.accountsService.signInWithFrequency(walletLoginRequestDTO);
-      // return { status: 202, message: `SIWF in progress. referenceId: ${referenceId}`, data: loginResponse };
       return loginResponse;
     } catch (error) {
       this.logger.error(`Failed to Sign In With Frequency: ${error}`);
