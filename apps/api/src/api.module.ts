@@ -16,6 +16,8 @@ import { NonceService, QueueConstants } from '../../../libs/common/src';
 import { AccountsService } from './services/accounts.service';
 import { HandlesService } from './services/handles.service';
 import { HandlesController } from './controllers/handles.controller';
+import { DelegationService } from './services/delegation.service';
+import { DelegationController } from './controllers/delegation.controller';
 
 @Module({
   imports: [
@@ -74,7 +76,7 @@ import { HandlesController } from './controllers/handles.controller';
     }),
     BullModule.registerQueue(
       {
-        name: QueueConstants.ACCOUNT_CHANGE_PUBLISH_QUEUE,
+        name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
         defaultJobOptions: {
           removeOnComplete: 20,
           removeOnFail: false,
@@ -82,7 +84,7 @@ import { HandlesController } from './controllers/handles.controller';
         },
       },
       {
-        name: QueueConstants.ACCOUNT_CHANGE_NOTIFY_QUEUE,
+        name: QueueConstants.TRANSACTION_NOTIFY_QUEUE,
         defaultJobOptions: {
           removeOnComplete: 20,
           removeOnFail: false,
@@ -96,17 +98,17 @@ import { HandlesController } from './controllers/handles.controller';
       adapter: ExpressAdapter,
     }),
     BullBoardModule.forFeature({
-      name: QueueConstants.ACCOUNT_CHANGE_PUBLISH_QUEUE,
+      name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
       adapter: BullMQAdapter,
     }),
     BullBoardModule.forFeature({
-      name: QueueConstants.ACCOUNT_CHANGE_NOTIFY_QUEUE,
+      name: QueueConstants.TRANSACTION_NOTIFY_QUEUE,
       adapter: BullMQAdapter,
     }),
     ScheduleModule.forRoot(),
   ],
-  providers: [ApiService, AccountsService, HandlesService, ConfigService, NonceService],
-  controllers: [ApiController, AccountsController, HandlesController],
+  providers: [ApiService, AccountsService, HandlesService, DelegationService, ConfigService, NonceService],
+  controllers: [ApiController, AccountsController, DelegationController, HandlesController],
   exports: [],
 })
 export class ApiModule {}

@@ -1,31 +1,25 @@
 /* eslint-disable no-underscore-dangle */
 import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { ApiPromise, ApiRx, HttpProvider, WsProvider } from '@polkadot/api';
-import { firstValueFrom, from } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { options } from '@frequency-chain/api-augment';
 import { KeyringPair } from '@polkadot/keyring/types';
-import {
-  AccountId,
-  BlockHash,
-  BlockNumber,
-  DispatchError,
-  DispatchInfo,
-  Hash,
-  SignedBlock,
-} from '@polkadot/types/interfaces';
+import { AccountId, BlockHash, BlockNumber, DispatchError, Hash, SignedBlock } from '@polkadot/types/interfaces';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { AnyNumber, ISubmittableResult, RegistryError } from '@polkadot/types/types';
-import { u32, Option, u128, u16, u8, u64, Bytes } from '@polkadot/types';
+import { u32, Option, u128, Bytes } from '@polkadot/types';
 import {
+  CommonPrimitivesHandlesClaimHandlePayload,
+  CommonPrimitivesMsaDelegation,
   PalletCapacityCapacityDetails,
   PalletCapacityEpochInfo,
   PalletSchemasSchemaInfo,
 } from '@polkadot/types/lookup';
+import { u8aToHex, u8aWrapBytes } from '@polkadot/util';
 import { ConfigService } from '../config/config.service';
 import { Extrinsic } from './extrinsic';
-import type { HandleResponse } from '@frequency-chain/api-augment/interfaces';
-import { u8aToHex, u8aWrapBytes } from '@polkadot/util';
 import { createKeys } from './create-keys';
+import { Handle } from '../types/dtos/handles.dto';
 
 export type Sr25519Signature = { Sr25519: `0x${string}` };
 
@@ -41,7 +35,7 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
 
   public async onApplicationBootstrap() {
     const providerUrl = this.configService.frequencyUrl!;
-    let provider: any;
+    let provider: WsProvider | HttpProvider;
     if (/^ws/.test(providerUrl.toString())) {
       provider = new WsProvider(providerUrl.toString());
     } else if (/^http/.test(providerUrl.toString())) {
@@ -157,16 +151,7 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
   //   return schema;
   // }
 
-  public async createSponsoredAccountWithDelegation(
-    delegatorAddress: KeyringPair['address'],
-    signature: Sr25519Signature,
-    payload: any,
-  ) {
-    const extrinsic = this.api.tx.msa.createSponsoredAccountWithDelegation(delegatorAddress, signature, payload);
-    return extrinsic;
-  }
-
-  public async getMsaIdMax() {
+  public async getMsaIdMax(): Promise<number> {
     const count = await this.query('msa', 'currentMsaIdentifierMaximum');
     // eslint-disable-next-line radix
     return parseInt(count);
@@ -178,14 +163,14 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
   }
 
   public async claimHandle(accountId: AccountId, baseHandle: string, payload: (any | undefined)[]) {
-    const handle_vec = new Bytes(this.api.registry, baseHandle);
+    const handleVec = new Bytes(this.api.registry, baseHandle);
     const expiration = Number(await this.getLatestFinalizedBlockNumber()) + 50;
     const handlePayload = {
-      baseHandle: handle_vec,
-      expiration: expiration,
+      baseHandle: handleVec,
+      expiration,
       ...payload,
     };
-    const claimHandlePayload: any = this.api.registry.createType(
+    const claimHandlePayload: CommonPrimitivesHandlesClaimHandlePayload = this.api.registry.createType(
       'CommonPrimitivesHandlesClaimHandlePayload',
       handlePayload,
     );
@@ -201,14 +186,14 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
   }
 
   public async changeHandle(accountId: AccountId, baseHandle: string, payload: (any | undefined)[]) {
-    const handle_vec = new Bytes(this.api.registry, baseHandle);
+    const handleVec = new Bytes(this.api.registry, baseHandle);
     const expiration = Number(await this.getLatestFinalizedBlockNumber()) + 50;
     const handlePayload = {
-      baseHandle: handle_vec,
-      expiration: expiration,
+      baseHandle: handleVec,
+      expiration,
       ...payload,
     };
-    const claimHandlePayload: any = this.api.registry.createType(
+    const claimHandlePayload: CommonPrimitivesHandlesClaimHandlePayload = this.api.registry.createType(
       'CommonPrimitivesHandlesClaimHandlePayload',
       handlePayload,
     );
@@ -223,9 +208,18 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     return this.api.tx.handles.changeHandle(accountId, claimHandleProof, claimHandlePayload);
   }
 
-  public async getHandleForMsa(msaId: number): Promise<HandleResponse | null> {
+  public async getHandleForMsa(msaId: number): Promise<Handle | null> {
     const handleResponse = await this.rpc('handles', 'getHandleForMsa', msaId);
     if (handleResponse.isSome) return handleResponse.unwrap();
+    return null;
+  }
+
+  public async getCommonPrimitivesMsaDelegation(
+    msaId: number,
+    providerId: number,
+  ): Promise<CommonPrimitivesMsaDelegation | null> {
+    const delegationResponse = await this.apiPromise.query.msa.delegatorAndProviderToDelegation(msaId, providerId);
+    if (delegationResponse.isSome) return delegationResponse.unwrap();
     return null;
   }
 
@@ -241,8 +235,8 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     return null;
   }
 
-  public async capacityInfo(providerId: string): Promise<{
-    providerId: string;
+  public async capacityInfo(providerId: number): Promise<{
+    providerId: number;
     currentBlockNumber: number;
     nextEpochStart: number;
     remainingCapacity: bigint;

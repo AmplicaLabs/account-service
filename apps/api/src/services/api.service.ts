@@ -7,13 +7,13 @@ import { Hash, createHash, randomUUID } from 'crypto';
 import { MessageSourceId } from '@frequency-chain/api-augment/interfaces';
 import { validateSignin, validateSignup } from '@amplica-labs/siwf';
 
-import { NonceService, QueueConstants } from '../../../../libs/common/src';
+import { NonceService, QueueConstants, TransactionType } from '../../../../libs/common/src';
 import { ConfigService } from '../../../../libs/common/src/config/config.service';
 import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
-import { WalletLoginResponseDTO } from '../../../../libs/common/src/dtos/wallet.login.response.dto';
-import { WalletLoginRequestDTO } from '../../../../libs/common/src/dtos/wallet.login.request.dto';
+import { WalletLoginResponseDTO } from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
+import { WalletLoginRequestDTO } from '../../../../libs/common/src/types/dtos/wallet.login.request.dto';
 import { createKeys } from '../../../../libs/common/src/blockchain/create-keys';
-import { AccountChangeType } from '../../../../libs/common/src/dtos/account.change.notification.dto';
+import { AccountChangeType } from '../../../../libs/common/src/types/dtos/account.change.notification.dto';
 
 export type RequestAccount = { publicKey: string; msaId?: string };
 // uuid auth token to Public Key
@@ -25,8 +25,8 @@ export class ApiService implements OnApplicationShutdown {
 
   constructor(
     @InjectRedis() private redis: Redis,
-    @InjectQueue(QueueConstants.ACCOUNT_CHANGE_PUBLISH_QUEUE)
-    private accountChangePublishQueue: Queue,
+    @InjectQueue(QueueConstants.TRANSACTION_PUBLISH_QUEUE)
+    private transactionPublishQueue: Queue,
     private configService: ConfigService,
     private blockchainService: BlockchainService,
     private nonceService: NonceService,
@@ -64,9 +64,9 @@ export class ApiService implements OnApplicationShutdown {
     let response: WalletLoginResponseDTO;
     if (request.signUp) {
       try {
-        const payload = await validateSignup(api, request.signUp, providerId);
+        const payload = await validateSignup(api, request.signUp, providerId.toString());
         // Pass all this data to the transaction publisher queue
-        const referenceId = await this.enqueueRequest(payload, AccountChangeType.SIWF_SIGNUP);
+        const referenceId = await this.enqueueRequest(payload, TransactionType.SIWF_SIGNUP);
 
         response = {
           accessToken: await this.createAuthToken(payload.publicKey),
@@ -100,7 +100,7 @@ export class ApiService implements OnApplicationShutdown {
     throw new Error('Invalid Sign-In With Frequency Request');
   }
 
-  async enqueueRequest(request, type: AccountChangeType): Promise<Hash> {
+  async enqueueRequest(request, type: TransactionType): Promise<Hash> {
     const providerId = this.configService.getProviderId();
     const data = {
       ...request,
@@ -109,7 +109,7 @@ export class ApiService implements OnApplicationShutdown {
       referenceId: this.calculateJobId(request),
     };
 
-    const job = await this.accountChangePublishQueue.add(`Transaction Job - ${data.referenceId}`, data, {
+    const job = await this.transactionPublishQueue.add(`Transaction Job - ${data.referenceId}`, data, {
       jobId: data.referenceId,
     });
     this.logger.debug(`job: ${job}`);

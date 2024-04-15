@@ -9,16 +9,18 @@ export enum AccountChangeType {
 
 type Update = {
   type: AccountChangeType;
-  providerId: string;
+  providerId: number;
   payload: Uint8Array;
 };
 
 export class AccountChangeNotificationDto {
   msaId: string;
+
   update: Update;
 }
 
-export class AccountUpdateJob {
+export class TransactionJob {
   referenceId: string;
+
   update: Update;
 }

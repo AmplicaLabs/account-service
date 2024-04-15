@@ -9,7 +9,7 @@ import { BlockchainModule } from '../../../../libs/common/src/blockchain/blockch
 import { ConfigModule } from '../../../../libs/common/src/config/config.module';
 import { ConfigService } from '../../../../libs/common/src/config/config.service';
 import { NonceService, QueueConstants } from '../../../../libs/common/src';
-import { AccountUpdatePublisherService } from './account.publisher.processor.service';
+import { TransactionPublisherService } from './publisher.service';
 
 @Module({
   imports: [
@@ -50,14 +50,14 @@ import { AccountUpdatePublisherService } from './account.publisher.processor.ser
     }),
     BullModule.registerQueue(
       {
-        name: QueueConstants.ACCOUNT_CHANGE_NOTIFY_QUEUE,
+        name: QueueConstants.TRANSACTION_NOTIFY_QUEUE,
         defaultJobOptions: {
           removeOnComplete: true,
           removeOnFail: false,
         },
       },
       {
-        name: QueueConstants.ACCOUNT_CHANGE_PUBLISH_QUEUE,
+        name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
         defaultJobOptions: {
           removeOnComplete: true,
           removeOnFail: false,
@@ -65,7 +65,7 @@ import { AccountUpdatePublisherService } from './account.publisher.processor.ser
       },
     ),
   ],
-  providers: [AccountUpdatePublisherService, NonceService],
-  exports: [BullModule, AccountUpdatePublisherService],
+  providers: [TransactionPublisherService, NonceService],
+  exports: [BullModule, TransactionPublisherService],
 })
-export class AccountUpdatePublisherModule {}
+export class TransactionPublisherModule {}

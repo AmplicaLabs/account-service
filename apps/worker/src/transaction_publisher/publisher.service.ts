@@ -3,7 +3,7 @@ import { InjectQueue, Processor } from '@nestjs/bullmq';
 import { Injectable, OnApplicationShutdown } from '@nestjs/common';
 import { Job, Queue } from 'bullmq';
 import Redis from 'ioredis';
-import { Call, Hash } from '@polkadot/types/interfaces';
+import { Hash } from '@polkadot/types/interfaces';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { SubmittableExtrinsic } from '@polkadot/api-base/types';
 import { Codec, ISubmittableResult } from '@polkadot/types/types';
@@ -14,9 +14,8 @@ import { QueueConstants, NonceService } from '../../../../libs/common/src';
 import { BaseConsumer } from '../BaseConsumer';
 import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
 import { createKeys } from '../../../../libs/common/src/blockchain/create-keys';
-import { Extrinsic } from '../../../../libs/common/src/blockchain/extrinsic';
-import { ITxMonitorJob } from '../../../../libs/common/src/dtos/account.notifier.job';
-import { AccountChangeType } from '../../../../libs/common/src/dtos/account.change.notification.dto';
+import { TxMonitorJob } from '../../../../libs/common/src/types/dtos/transaction.dto';
+import { TransactionType } from '../../../../libs/common/src/types/enums';
 
 export const SECONDS_PER_BLOCK = 12;
 const CAPACITY_EPOCH_TIMEOUT_NAME = 'capacity_check';
@@ -25,8 +24,8 @@ const CAPACITY_EPOCH_TIMEOUT_NAME = 'capacity_check';
  * Service responsible for publishing account updates.
  */
 @Injectable()
-@Processor(QueueConstants.ACCOUNT_CHANGE_PUBLISH_QUEUE)
-export class AccountUpdatePublisherService extends BaseConsumer implements OnApplicationShutdown {
+@Processor(QueueConstants.TRANSACTION_PUBLISH_QUEUE)
+export class TransactionPublisherService extends BaseConsumer implements OnApplicationShutdown {
   public async onApplicationBootstrap() {
     await this.checkCapacity();
   }
@@ -41,10 +40,10 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
 
   constructor(
     @InjectRedis() private cacheManager: Redis,
-    @InjectQueue(QueueConstants.ACCOUNT_CHANGE_PUBLISH_QUEUE)
-    private accountChangePublishQueue: Queue,
-    @InjectQueue(QueueConstants.ACCOUNT_CHANGE_NOTIFY_QUEUE)
-    private accountChangeNotifyQueue: Queue,
+    @InjectQueue(QueueConstants.TRANSACTION_PUBLISH_QUEUE)
+    private transactionPublishQueue: Queue,
+    @InjectQueue(QueueConstants.TRANSACTION_NOTIFY_QUEUE)
+    private transactionNotifyQueue: Queue,
     private configService: ConfigService,
     private blockchainService: BlockchainService,
     private nonceService: NonceService,
@@ -62,13 +61,13 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
     let accountTxnHash: Hash = {} as Hash;
 
     try {
-      this.logger.log(`Processing job ${job.id} of type ${job.name}.... ${JSON.stringify(job)}`);
+      this.logger.log(`Processing job ${job.id} of type ${job.name}.}`);
       const lastFinalizedBlockHash = await this.blockchainService.getLatestFinalizedBlockHash();
       const currentCapacityEpoch = await this.blockchainService.getCurrentCapacityEpoch();
       const providerKeys = createKeys(this.configService.getProviderAccountSeedPhrase());
       let tx: SubmittableExtrinsic<any>;
       switch (job.data.type) {
-        case AccountChangeType.CREATE_HANDLE: {
+        case TransactionType.CREATE_HANDLE: {
           tx = await this.blockchainService.claimHandle(job.data.accountId, job.data.baseHandle, [
             job.data.providerId,
             job.data.payload,
@@ -78,7 +77,7 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
           this.logger.debug(`successful job: ${JSON.stringify(job, null, 2)}`);
           break;
         }
-        case AccountChangeType.CHANGE_HANDLE: {
+        case TransactionType.CHANGE_HANDLE: {
           tx = await this.blockchainService.changeHandle(job.data.accountId, job.data.baseHandle, [
             job.data.providerId,
             job.data.payload,
@@ -88,13 +87,15 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
           this.logger.debug(`successful job: ${JSON.stringify(job, null, 2)}`);
           break;
         }
-        case AccountChangeType.SIWF_SIGNUP: {
+        case TransactionType.SIWF_SIGNUP: {
           // eslint-disable-next-line prettier/prettier
           const txns = job.data.calls?.map((x) =>
             this.blockchainService.api.tx(x.encodedExtrinsic),
           );
           const callVec = this.blockchainService.createType('Vec<Call>', txns);
           accountTxnHash = await this.processBatchTxn(providerKeys, callVec);
+          this.logger.debug(`txns: ${txns}`);
+          this.logger.debug(`successful job: ${JSON.stringify(job, null, 2)}`);
           break;
         }
         default: {
@@ -102,9 +103,11 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
         }
       }
 
+      this.logger.debug(`successful job: ${JSON.stringify(job, null, 2)}`);
+
       // Add a job to the account change notify queue
-      // const txMonitorJob: ITxMonitorJob = {
-      const txMonitorJob = {
+      const txMonitorJob: TxMonitorJob = {
+        ...job.data,
         id: job.data.referenceId,
         txHash: accountTxnHash,
         epoch: currentCapacityEpoch.toString(),
@@ -114,10 +117,10 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
       const blockDelay = SECONDS_PER_BLOCK * MILLISECONDS_PER_SECOND;
 
       this.logger.debug(`Adding job to transaction change notify queue: ${txMonitorJob.id}`);
-      this.accountChangeNotifyQueue.add(`Transaction Change Notify Job - ${txMonitorJob.id}`, txMonitorJob, {
+      this.transactionNotifyQueue.add(`Transaction Change Notify Job - ${txMonitorJob.id}`, txMonitorJob, {
         delay: blockDelay,
       });
-    } catch (error: any) {
+    } catch (error) {
       this.logger.error(error);
       throw error;
     } finally {
@@ -155,7 +158,7 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
       }
       this.logger.debug(`Tx hash: ${txHash}`);
       return txHash;
-    } catch (error: any) {
+    } catch (error) {
       this.logger.error(`Error processing single transaction: ${error}`);
       throw error;
     }
@@ -221,7 +224,7 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
       }
 
       if (outOfCapacity) {
-        await this.accountChangePublishQueue.pause();
+        await this.transactionPublishQueue.pause();
         const blocksRemaining = capacityInfo.nextEpochStart - capacityInfo.currentBlockNumber;
         const epochTimeout = blocksRemaining * SECONDS_PER_BLOCK * MILLISECONDS_PER_SECOND;
         this.logger.warn(
@@ -246,7 +249,7 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
       } else {
         this.logger.verbose('Capacity Available: Resuming account change publish queue and clearing timeout');
         // Get the failed jobs and check if they failed due to capacity
-        const failedJobs = await this.accountChangePublishQueue.getFailed();
+        const failedJobs = await this.transactionPublishQueue.getFailed();
         const capacityFailedJobs = failedJobs.filter((job) =>
           job.failedReason?.includes('1010: Invalid Transaction: Inability to pay some fees'),
         );
@@ -263,7 +266,7 @@ export class AccountUpdatePublisherService extends BaseConsumer implements OnApp
           // ignore
         }
 
-        await this.accountChangePublishQueue.resume();
+        await this.transactionPublishQueue.resume();
       }
     } catch (err) {
       this.logger.error('Caught error in checkCapacity', err);

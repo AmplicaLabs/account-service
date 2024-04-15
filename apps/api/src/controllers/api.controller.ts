@@ -1,7 +1,7 @@
 import { Controller, Get, Post, HttpCode, HttpStatus, Logger, Query, Body, Put, HttpException } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { WalletLoginResponseDTO } from '../../../../libs/common/src/dtos/wallet.login.response.dto';
-import { WalletLoginRequestDTO } from '../../../../libs/common/src/dtos/wallet.login.request.dto';
+import { WalletLoginResponseDTO } from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
+import { WalletLoginRequestDTO } from '../../../../libs/common/src/types/dtos/wallet.login.request.dto';
 import { ApiService } from '../services/api.service';
 
 @Controller('api')

@@ -8,7 +8,7 @@ import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { ConfigModule } from '../../../../libs/common/src/config/config.module';
 import { ConfigService } from '../../../../libs/common/src/config/config.service';
 import { QueueConstants } from '../../../../libs/common/src';
-import { TxnNotifierService } from './account.monitor.processor.service';
+import { TxnNotifierService } from './notifier.service';
 import { BlockchainModule } from '../../../../libs/common/src/blockchain/blockchain.module';
 import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
 
@@ -51,7 +51,7 @@ import { BlockchainService } from '../../../../libs/common/src/blockchain/blockc
     }),
     BullModule.registerQueue(
       {
-        name: QueueConstants.ACCOUNT_CHANGE_PUBLISH_QUEUE,
+        name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
         defaultJobOptions: {
           removeOnComplete: true,
           removeOnFail: false,
@@ -59,7 +59,7 @@ import { BlockchainService } from '../../../../libs/common/src/blockchain/blockc
         },
       },
       {
-        name: QueueConstants.ACCOUNT_CHANGE_NOTIFY_QUEUE,
+        name: QueueConstants.TRANSACTION_NOTIFY_QUEUE,
         defaultJobOptions: {
           removeOnComplete: true,
           removeOnFail: false,
