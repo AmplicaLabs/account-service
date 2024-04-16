@@ -1,3 +1,4 @@
+import '@frequency-chain/api-augment';
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { BullModule } from '@nestjs/bullmq';
@@ -109,21 +110,8 @@ import { KeysController } from './controllers/keys.controller';
     }),
     ScheduleModule.forRoot(),
   ],
-  providers: [
-    ApiService,
-    AccountsService,
-    HandlesService,
-    DelegationService,
-    KeysService,
-    ConfigService,
-  ],
-  controllers: [
-    ApiController,
-    AccountsController,
-    DelegationController,
-    KeysController,
-    HandlesController,
-  ],
+  providers: [ApiService, AccountsService, HandlesService, DelegationService, KeysService, ConfigService],
+  controllers: [ApiController, AccountsController, DelegationController, KeysController, HandlesController],
   exports: [],
 })
 export class ApiModule {}
