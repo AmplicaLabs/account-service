@@ -1,3 +1,4 @@
+import '@frequency-chain/api-augment';
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
