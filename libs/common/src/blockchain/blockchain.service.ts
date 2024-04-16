@@ -1,8 +1,8 @@
 /* eslint-disable no-underscore-dangle */
 import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
-import { ApiPromise, ApiRx, HttpProvider, WsProvider } from '@polkadot/api';
-import { firstValueFrom } from 'rxjs';
 import { options } from '@frequency-chain/api-augment';
+import { ApiPromise, ApiRx, HttpProvider, WsProvider } from '@polkadot/api';
+import { Observable, firstValueFrom } from 'rxjs';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountId, BlockHash, BlockNumber, DispatchError, Hash, SignedBlock } from '@polkadot/types/interfaces';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -16,10 +16,12 @@ import {
   PalletSchemasSchemaInfo,
 } from '@polkadot/types/lookup';
 import { u8aToHex, u8aWrapBytes } from '@polkadot/util';
+import { KeyInfoResponse } from '@frequency-chain/api-augment/interfaces';
 import { ConfigService } from '../config/config.service';
 import { Extrinsic } from './extrinsic';
 import { createKeys } from './create-keys';
 import { Handle } from '../types/dtos/handles.dto';
+import { KeysResponse } from '../types/dtos/keys.dto';
 
 export type Sr25519Signature = { Sr25519: `0x${string}` };
 
@@ -146,10 +148,10 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     return this.rpc('system', 'accountNextIndex', account);
   }
 
-  // public async getSchema(schemaId: number): Promise<PalletSchemasSchema> {
-  //   const schema: PalletSchemasSchema = await this.query('schemas', 'schemas', schemaId);
-  //   return schema;
-  // }
+  public async getSchema(schemaId: number): Promise<PalletSchemasSchemaInfo> {
+    const schema: PalletSchemasSchemaInfo = await this.query('schemas', 'schemas', schemaId);
+    return schema;
+  }
 
   public async getMsaIdMax(): Promise<number> {
     const count = await this.query('msa', 'currentMsaIdentifierMaximum');
@@ -160,6 +162,11 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
   public async isValidMsaId(msaId: number): Promise<boolean> {
     const msaIdMax = await this.getMsaIdMax();
     return msaId > 0 && msaId < msaIdMax;
+  }
+
+  public async getKeysByMsa(msaId: number): Promise<KeyInfoResponse> {
+    const keyInfoResponse = this.api.rpc.msa.getKeysByMsaId(msaId);
+    return (await firstValueFrom(keyInfoResponse)).unwrap();
   }
 
   public async claimHandle(accountId: AccountId, baseHandle: string, payload: (any | undefined)[]) {

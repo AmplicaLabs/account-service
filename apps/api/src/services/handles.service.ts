@@ -16,7 +16,6 @@ export class HandlesService {
   private readonly logger: Logger;
 
   constructor(
-    // @InjectRedis() private redis: Redis,
     @InjectQueue(QueueConstants.TRANSACTION_PUBLISH_QUEUE)
     private transactionPublishQueue: Queue,
     private configService: ConfigService,
