@@ -4,18 +4,38 @@ import { ApiProperty } from '@nestjs/swagger';
 import { HandleResponse } from '@frequency-chain/api-augment/interfaces';
 import { TransactionType } from '../enums';
 
-export class HandleRequest {
-  @ApiProperty()
-  @IsNotEmpty()
-  accountId: AccountId['toHuman'];
-
+class HandlePayload {
   @ApiProperty()
   @IsNotEmpty()
   baseHandle: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  expiration: number;
 }
 
-export type PublishHandleRequest = HandleRequest & {
-  type: TransactionType.CHANGE_HANDLE | TransactionType.CREATE_HANDLE;
+export class HandleRequest {
+  @ApiProperty()
+  @IsNotEmpty()
+  accountId: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  payload: HandlePayload;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  proof: string;
+}
+
+export type CreateHandleRequest = HandleRequest & {
+  type: TransactionType.CREATE_HANDLE;
 };
+
+export type ChangeHandleRequest = HandleRequest & {
+  type: TransactionType.CHANGE_HANDLE;
+};
+
+export type PublishHandleRequest = CreateHandleRequest | ChangeHandleRequest;
 
 export type Handle = HandleResponse;
