@@ -3,7 +3,6 @@ import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { KeysService } from '../services/keys.service';
 import {
   AddKeysRequest,
-  DeleteKeysRequest,
   KeysResponse,
   PublishKeysRequest,
 } from '../../../../libs/common/src/types/dtos/keys.dto';

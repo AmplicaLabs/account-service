@@ -55,14 +55,14 @@ export class HandlesController {
    * @returns A message that the handle change is in progress.
    * @throws An error if the handle creation fails.
    */
-  async changeHandle(@Body() changeHandleRequest: HandleRequest): Promise<TransactionResponse> {
+  async changeHandle(@Body() changeHandleRequest: HandleRequest) {
     try {
-      const response = await this.enqueueService.enqueueRequest<PublishHandleRequest>({
+      const { referenceId } = await this.handlesService.enqueueRequest({
         ...changeHandleRequest,
         type: TransactionType.CHANGE_HANDLE,
       });
-      this.logger.log(`changeHandle in progress. referenceId: ${response.referenceId}`);
-      return response;
+      this.logger.log(`changeHandle in progress. referenceId: ${referenceId}`);
+      return `changeHandle in progress. referenceId: ${referenceId}`;
     } catch (error) {
       this.logger.error(error);
       throw new Error('Failed to change handle');
