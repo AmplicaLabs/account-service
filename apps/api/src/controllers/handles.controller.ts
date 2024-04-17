@@ -1,8 +1,8 @@
 import { Controller, Get, Post, HttpCode, HttpStatus, Logger, Param, HttpException, Body } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { HandleResponse } from '@frequency-chain/api-augment/interfaces';
 import { HandlesService } from '../services/handles.service';
 import { HandleRequest } from '../../../../libs/common/src/types/dtos/handles.dto';
+import type { HandleResponse } from '@frequency-chain/api-augment/interfaces';
 import { TransactionType } from '../../../../libs/common/src/types/enums';
 
 @Controller('handles')
@@ -10,7 +10,10 @@ import { TransactionType } from '../../../../libs/common/src/types/enums';
 export class HandlesController {
   private readonly logger: Logger;
 
-  constructor(private handlesService: HandlesService) {
+  constructor(
+    private handlesService: HandlesService,
+    private enqueueService: EnqueueService,
+  ) {
     this.logger = new Logger(this.constructor.name);
   }
 
@@ -27,7 +30,7 @@ export class HandlesController {
    */
   async createHandle(@Body() createHandleRequest: HandleRequest) {
     try {
-      const { referenceId } = await this.handlesService.enqueueRequest({
+      const { referenceId } = await this.enqueueService.enqueueRequest<PublishHandleRequest>({
         ...createHandleRequest,
         type: TransactionType.CREATE_HANDLE,
       });
@@ -52,7 +55,7 @@ export class HandlesController {
    */
   async changeHandle(@Body() changeHandleRequest: HandleRequest) {
     try {
-      const { referenceId } = await this.handlesService.enqueueRequest({
+      const { referenceId } = await this.enqueueService.enqueueRequest<PublishHandleRequest>({
         ...changeHandleRequest,
         type: TransactionType.CHANGE_HANDLE,
       });
