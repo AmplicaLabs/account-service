@@ -19,7 +19,7 @@ export interface ConfigEnvironmentVariables {
   QUEUE_HIGH_WATER: number;
   API_PORT: number;
   DEBOUNCE_SECONDS: number;
-  ACCOUNT_ENVIRONMENT_TYPE: keyof EnvironmentType;
+  ACCOUNT_ENVIRONMENT_TYPE?: keyof EnvironmentType;
   ACCOUNT_ENVIRONMENT_DEV_CONFIG?: string;
   PROVIDER_ACCOUNT_SEED_PHRASE: string;
   PROVIDER_ID: string;

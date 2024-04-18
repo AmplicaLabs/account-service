@@ -15,7 +15,7 @@ export class HandleRequest {
 }
 
 export type PublishHandleRequest = HandleRequest & {
-  type: TransactionType.CHANGE_HANDLE | TransactionType.CREATE_HANDLE;
+  type: TransactionType.CHANGE_HANDLE | TransactionType.CREATE_HANDLE | TransactionType.SIWF_SIGNUP;
 };
 
 export type Handle = HandleResponse;

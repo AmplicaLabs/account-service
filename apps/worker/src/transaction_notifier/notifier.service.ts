@@ -59,6 +59,7 @@ export class TxnNotifierService extends BaseConsumer {
           this.logger.debug(`Error found in tx result: ${JSON.stringify(txResult.error)}`);
           const errorReport = await this.handleMessagesFailure(txResult.error);
           if (errorReport.retry) {
+            // TODO: Determine if errors are recoverable and if we need to retry the job
             // await this.retryRequestJob(job.data.referencePublishJob.referenceId);
           } else {
             throw new Error(`Job ${job.data.id} failed with error ${JSON.stringify(txResult.error)}`);
@@ -67,25 +68,22 @@ export class TxnNotifierService extends BaseConsumer {
 
         if (txResult.success) {
           this.logger.verbose(`Successfully found ${job.data.txHash} found in block ${txResult.blockHash}`);
-          const webhookList = await this.getWebhookList(job.data.providerId);
-          this.logger.debug(`Found ${webhookList.length} webhooks for ${job.data.providerId}`);
-          // const requestJob: Job<ProviderGraphUpdateJob, any, string> | undefined =
-          //   await this.changeRequestQueue.getJob(job.data.referencePublishJob.referenceId);
+          const webhook = await this.getWebhook();
 
-          if (job.data.type === TransactionType.CHANGE_HANDLE) {
-            this.logger.debug(`Changed handle for ${job.data.providerId}.`);
-          }
-          if (job.data.type === TransactionType.CREATE_HANDLE) {
-            this.logger.debug(`Created handle for ${job.data.providerId}.`);
-            // const graphKeyPairs = requestJob?.data.graphKeyPairs ?? [];
-            // const dsnpUserId: MessageSourceId = this.blockchainService.api.registry.createType(
-            //   'MessageSourceId',
-            //   job.data.referencePublishJob.update.ownerDsnpUserId,
-            // );
-            // const schemaId: SchemaId = this.blockchainService.api.registry.createType(
-            //   'SchemaId',
-            //   job.data.referencePublishJob.update.schemaId,
-            // );
+          // TODO: Set the appropriate payload data for the webhook callback
+          switch (job.data.type) {
+            case TransactionType.CHANGE_HANDLE:
+              this.logger.debug(`Changed handle for ${job.data.providerId}.`);
+              break;
+            case TransactionType.CREATE_HANDLE:
+              this.logger.debug(`Created handle for ${job.data.providerId}.`);
+              break;
+            case TransactionType.SIWF_SIGNUP:
+              this.logger.debug(`Signed up for ${job.data.providerId}.`);
+              break;
+            default:
+              this.logger.debug(`Unknown transaction type: ${job.data.type}`);
+              break;
           }
 
           const notification: TransactionNotification = {
@@ -93,23 +91,21 @@ export class TxnNotifierService extends BaseConsumer {
             data: job.data,
           };
 
-          webhookList.forEach(async (webhookUrl) => {
-            let retries = 0;
-            while (retries < this.configService.getHealthCheckMaxRetries()) {
-              try {
-                this.logger.debug(`Sending transaction notification to webhook: ${webhookUrl}`);
-                this.logger.debug(`Transaction: ${JSON.stringify(notification)}`);
-                // eslint-disable-next-line no-await-in-loop
-                await axios.post(webhookUrl, notification);
-                this.logger.debug(`Notification sent to webhook: ${webhookUrl}`);
-                break;
-              } catch (error) {
-                this.logger.error(`Failed to send notification to webhook: ${webhookUrl}`);
-                this.logger.error(error);
-                retries += 1;
-              }
+          let retries = 0;
+          while (retries < this.configService.getHealthCheckMaxRetries()) {
+            try {
+              this.logger.debug(`Sending transaction notification to webhook: ${webhook}`);
+              this.logger.debug(`Transaction: ${JSON.stringify(notification)}`);
+              // eslint-disable-next-line no-await-in-loop
+              await axios.post(webhook, notification);
+              this.logger.debug(`Notification sent to webhook: ${webhook}`);
+              break;
+            } catch (error) {
+              this.logger.error(`Failed to send notification to webhook: ${webhook}`);
+              this.logger.error(error);
+              retries += 1;
             }
-          });
+          }
         }
       }
     } catch (e) {
@@ -117,6 +113,9 @@ export class TxnNotifierService extends BaseConsumer {
       throw e;
     }
   }
+
+  // TODO: Determine if any errors are recoverable and if we need to retry the job
+  //       The queue will automatically retry the job if it fails already.
 
   // private async retryRequestJob(requestReferenceId: string): Promise<void> {
   //   this.logger.debug(`Retrying graph change request job ${requestReferenceId}`);
@@ -154,25 +153,22 @@ export class TxnNotifierService extends BaseConsumer {
 
   private async handleMessagesFailure(moduleError: RegistryError): Promise<{ pause: boolean; retry: boolean }> {
     try {
+      // Handle the possible errors for create_sponsored_account_with_delegation and grant_delegation from the msa pallet
+      this.logger.debug(`Handling module error: ${moduleError?.method}`);
       switch (moduleError.method) {
-        case 'StalePageState':
-        case 'ProofHasExpired':
-        case 'ProofNotYetValid':
+        case 'AddProviderSignatureVerificationFailed':
+        case 'DuplicateProvider':
+        case 'UnauthorizedProvider':
+        case 'InvalidSelfProvider':
         case 'InvalidSignature':
-          // Re-try the job in the request change queue
-          return { pause: false, retry: true };
-        case 'InvalidSchemaId':
-          return { pause: true, retry: false };
-        case 'InvalidMessageSourceAccount':
-        case 'UnauthorizedDelegate':
-        case 'CorruptedState':
-        case 'InvalidItemAction':
-        case 'PageIdExceedsMaxAllowed':
-        case 'PageExceedsMaxPageSizeBytes':
-        case 'UnsupportedOperationForSchema':
-        case 'InvalidPayloadLocation':
-        case 'SchemaPayloadLocationMismatch':
-          // fail the job since this is unrecoverable
+        case 'NoKeyExists':
+        case 'KeyAlreadyRegistered':
+        case 'ProviderNotRegistered':
+        case 'ProofNotYetValid':
+        case 'ProofHasExpired':
+        case 'SignatureAlreadySubmitted':
+        case 'UnauthorizedDelegator':
+          // TODO: Are any of these errors recoverable?
           return { pause: false, retry: false };
         default:
           this.logger.error(`Unknown module error ${moduleError}`);
@@ -191,5 +187,9 @@ export class TxnNotifierService extends BaseConsumer {
     const redisList = await this.cacheManager.lrange(redisKey, 0, -1);
 
     return redisList || [];
+  }
+
+  async getWebhook(): Promise<string> {
+    return this.configService.providerBaseUrl.toString();
   }
 }

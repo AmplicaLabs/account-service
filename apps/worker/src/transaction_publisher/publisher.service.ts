@@ -87,9 +87,7 @@ export class TransactionPublisherService extends BaseConsumer implements OnAppli
         }
         case TransactionType.SIWF_SIGNUP: {
           // eslint-disable-next-line prettier/prettier
-          const txns = job.data.calls?.map((x) =>
-            this.blockchainService.api.tx(x.encodedExtrinsic),
-          );
+          const txns = job.data.calls?.map((x) => this.blockchainService.api.tx(x.encodedExtrinsic));
           const callVec = this.blockchainService.createType('Vec<Call>', txns);
           accountTxnHash = await this.processBatchTxn(providerKeys, callVec);
           this.logger.debug(`txns: ${txns}`);

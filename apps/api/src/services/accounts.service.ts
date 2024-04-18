@@ -55,7 +55,7 @@ export class AccountsService {
     const job = await this.transactionPublishQueue.add(`Transaction Job - ${data.referenceId}`, data, {
       jobId: data.referenceId,
     });
-    this.logger.debug(`job: ${job}`);
+    this.logger.debug(`enqueue job: ${job}`);
     return data.referenceId;
   }
 
