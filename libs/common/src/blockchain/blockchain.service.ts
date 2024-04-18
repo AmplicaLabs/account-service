@@ -176,17 +176,18 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
         baseHandle: handleVec,
         expiration: jobData.payload.expiration,
       },
-    ); 
+    );
 
     this.logger.debug(`claimHandlePayload: ${claimHandlePayload}`);
     this.logger.debug(`accountId: ${jobData.accountId}`);
 
     const claimHandleProof = { Sr25519: jobData.proof };
+    this.logger.debug(`claimHandleProof: ${JSON.stringify(claimHandleProof)}`);
 
     switch (jobData.type) {
-      case (TransactionType.CREATE_HANDLE):
+      case TransactionType.CREATE_HANDLE:
         return this.api.tx.handles.claimHandle(jobData.accountId, claimHandleProof, claimHandlePayload);
-      case (TransactionType.CHANGE_HANDLE):
+      case TransactionType.CHANGE_HANDLE:
         return this.api.tx.handles.changeHandle(jobData.accountId, claimHandleProof, claimHandlePayload);
     }
   }

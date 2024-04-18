@@ -10,7 +10,7 @@ import {
 } from '@dsnp/frequency-schemas/dsnp';
 import { Bytes, u32 } from '@polkadot/types';
 
-const FREQUENCY_URL = process.env.FREQUENCY_URL || 'ws://127.0.0.1:9944';
+export const FREQUENCY_URL = process.env.FREQUENCY_URL || 'ws://127.0.0.1:9944';
 
 function signPayloadWithKeyring(signingAccount, payload) {
   return { Sr25519: u8aToHex(signingAccount.sign(u8aWrapBytes(payload.toU8a()))) };
