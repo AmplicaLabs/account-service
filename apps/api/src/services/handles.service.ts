@@ -31,7 +31,7 @@ export class HandlesService {
   }
 
   async enqueueRequest(request: PublishHandleRequest): Promise<TransactionRepsonse> {
-    const providerId = this.configService.getProviderId();
+    const { providerId } = this.configService;
     const data: TransactionData = {
       ...request,
       providerId,

@@ -64,7 +64,7 @@ export class TransactionPublisherService extends BaseConsumer implements OnAppli
       this.logger.log(`Processing job ${job.id} of type ${job.name}.}`);
       const lastFinalizedBlockHash = await this.blockchainService.getLatestFinalizedBlockHash();
       const currentCapacityEpoch = await this.blockchainService.getCurrentCapacityEpoch();
-      const providerKeys = createKeys(this.configService.getProviderAccountSeedPhrase());
+      const providerKeys = createKeys(this.configService.providerAccountSeedPhrase);
       let tx: SubmittableExtrinsic<any>;
       switch (job.data.type) {
         case TransactionType.CREATE_HANDLE: {
@@ -192,8 +192,8 @@ export class TransactionPublisherService extends BaseConsumer implements OnAppli
    */
   private async checkCapacity(): Promise<void> {
     try {
-      const capacityLimit = this.configService.getCapacityLimit();
-      const capacityInfo = await this.blockchainService.capacityInfo(this.configService.getProviderId());
+      const { capacityLimit } = this.configService;
+      const capacityInfo = await this.blockchainService.capacityInfo(this.configService.providerId);
       const { remainingCapacity } = capacityInfo;
       const { currentEpoch } = capacityInfo;
       const epochCapacityKey = `epochCapacity:${currentEpoch}`;

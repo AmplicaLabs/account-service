@@ -184,7 +184,7 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     this.logger.debug(`claimHandlePayload: ${claimHandlePayload}`);
     this.logger.debug(`accountId: ${accountId}`);
 
-    const providerKeys = createKeys(this.configService.getProviderAccountSeedPhrase());
+    const providerKeys = createKeys(this.configService.providerAccountSeedPhrase);
 
     const claimHandleProof = {
       Sr25519: u8aToHex(providerKeys.sign(u8aWrapBytes(claimHandlePayload.toU8a()))),
@@ -207,7 +207,7 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     this.logger.debug(`claimHandlePayload: ${claimHandlePayload}`);
     this.logger.debug(`accountId: ${accountId}`);
 
-    const providerKeys = createKeys(this.configService.getProviderAccountSeedPhrase());
+    const providerKeys = createKeys(this.configService.providerAccountSeedPhrase);
 
     const claimHandleProof = {
       Sr25519: u8aToHex(providerKeys.sign(u8aWrapBytes(claimHandlePayload.toU8a()))),
