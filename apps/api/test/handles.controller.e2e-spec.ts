@@ -5,36 +5,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiModule } from '../src/api.module';
 import request from 'supertest';
-import { Bytes } from '@polkadot/types';
-import { u8aToHex, u8aWrapBytes } from '@polkadot/util';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
-import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
-import { before } from 'node:test';
-import { BlockchainService } from '../../../libs/common/src/blockchain/blockchain.service';
-
-export const FREQUENCY_URL = process.env.FREQUENCY_URL || 'ws://127.0.0.1:9944';
-
-function signPayloadWithKeyring(signingAccount, payload) {
-  return { Sr25519: u8aToHex(signingAccount.sign(u8aWrapBytes(payload.toU8a()))) };
-}
 
 describe('Handles Controller', () => {
   let app: INestApplication;
   let module: TestingModule;
-
-  // beforeAll(async () => {
-  //   const provider = new WsProvider(FREQUENCY_URL, 500, {}, 3_000);
-  //   // Connect to the API
-  //   api = await ApiPromise.create({
-  //     provider,
-  //     // throwOnConnect: true,
-  //   });
-  //   await Promise.race([
-  //     api.isReady,
-  //     new Promise((_, reject) => setTimeout(() => reject(new Error('WS Connection Timeout')), 30_000)),
-  //   ]);
-  //   console.log('API Connected');
-  // });
 
   beforeEach(async () => {
     module = await Test.createTestingModule({
@@ -57,6 +31,7 @@ describe('Handles Controller', () => {
 
     it('(POST) /handles a creates new handle becuase handle exists', async () => {
       const accountId = '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty';
+      // NOTE: This test will fail if block height > 65
       const payload = {
         baseHandle: 'BobHandle',
         expiration: 65,
@@ -73,6 +48,7 @@ describe('Handles Controller', () => {
 
     it('(POST) /handles/change a provider changes the handle', async () => {
       const accountId = '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty';
+      // NOTE: This test will fail if block height > 65
       const payload = {
         baseHandle: 'BobHandleChanged',
         expiration: 65,
