@@ -1,9 +1,9 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { Keyring } from '@polkadot/keyring';
 import { waitReady } from '@polkadot/wasm-crypto';
-import { _0n, hexToU8a, u8aToHex, u8aWrapBytes } from '@polkadot/util';
+import { _0n, u8aToHex, u8aWrapBytes } from '@polkadot/util';
 import { userPrivateConnections, userPrivateFollows, publicKey, userPublicFollows } from '@dsnp/frequency-schemas/dsnp';
-import { Bytes, u32 } from '@polkadot/types';
+import { Bytes } from '@polkadot/types';
 
 const FREQUENCY_URL = process.env.FREQUENCY_URL || 'ws://127.0.0.1:9944';
 
@@ -105,7 +105,7 @@ async function main() {
     'Itemized',
     ['AppendOnly'],
   );
-  const sudoTx = api.tx.sudo.sudo(txSchema4);
+  let sudoTx = api.tx.sudo.sudo(txSchema4);
   await new Promise((resolve) => sudoTx.signAndSend(alice, { nonce: currentNonce }, sendStatusCb(resolve)));
   currentNonce++;
   console.log('Public Key Schema created');
