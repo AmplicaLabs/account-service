@@ -31,7 +31,8 @@ export class DelegationService {
           revokedAt: commonPrimitivesMsaDelegation.revokedAt,
         };
         return delegationResponse;
-      } else throw new Error('Failed to find the delegation.');
+      }
+      throw new Error('Failed to find the delegation.');
     }
     throw new Error('Invalid msaId.');
   }
