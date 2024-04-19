@@ -29,10 +29,10 @@ Follow these steps to set up and run the Account Service:
 
 ### 1. Clone the Repository
 
-Clone the Content Publisher repository to your local machine:
+Clone the Account Service repository to your local machine:
 
 ```bash
-git clone https://github.com/amplicalabls/account-service.git
+git clone https://github.com/AmplicaLabs/account-service.git
 ```
 
 ### 2. Configure the application
@@ -122,7 +122,7 @@ In order to run the account-service in development mode without containers, you 
 
 4. Monitor the service worker jobs in [BullUI](http://0.0.0.0:3000/queues/).
 
-   Any API functions that require an extrinsic to submitted to the blockchain will be queued here. The queue will manage the amount of `capacity` this service is allowed to use.
+   Any API functions that require an extrinsic to be submitted to the blockchain will be queued here. The queue will manage the amount of `capacity` this service is allowed to use.
 
    Reference the [Frequency Docs](https://docs.frequency.xyz/) for more information about extrinsics and capacity.
 
