@@ -5,12 +5,12 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { Hash, createHash, randomUUID } from 'crypto';
 import { validateSignin, validateSignup } from '@amplica-labs/siwf';
-import { QueueConstants, TransactionType } from '../../../../libs/common/src';
+import { QueueConstants, TransactionData, TransactionType } from '../../../../libs/common/src';
 import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
 import type { AccountResponse } from '../../../../libs/common/src/types/dtos/accounts.dto';
 import { ConfigService } from '../../../../libs/common/src/config/config.service';
-import { WalletLoginRequestDTO } from '../../../../libs/common/src/types/dtos/wallet.login.request.dto';
-import { WalletLoginResponseDTO } from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
+import { PublishSIWFSignupRequest, WalletLoginRequest } from '../../../../libs/common/src/types/dtos/wallet.login.request.dto';
+import { SIWFSignupRequest, WalletLoginResponse } from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
 
 export type RequestAccount = { publicKey: string; msaId?: string };
 @Injectable()
@@ -30,22 +30,31 @@ export class AccountsService {
     this.logger = new Logger(this.constructor.name);
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  createAuthToken = async (publicKey: string): Promise<string> => {
+  /**
+   * Creates an authentication token for the given public key.
+   * @param publicKey - The public key associated with the authentication token.
+   * @returns A Promise that resolves to the generated authentication token.
+   */
+  private createAuthToken = async (publicKey: string): Promise<string> => {
     const uuid = randomUUID();
     this.authTokenRegistry.set(uuid, { publicKey });
     return uuid;
   };
 
+  /**
+   * Calculates the job ID based on the provided job object.
+   * @param jobWithoutId - The job object without the ID.
+   * @returns The calculated job ID.
+   */
   // eslint-disable-next-line class-methods-use-this
-  private calculateJobId(jobWithoutId): string {
+  public calculateJobId(jobWithoutId): string {
     const stringVal = JSON.stringify(jobWithoutId);
     return createHash('sha1').update(stringVal).digest('base64url');
   }
 
-  async enqueueRequest(request, type: TransactionType): Promise<Hash> {
+  async enqueueRequest(request, type: TransactionType): Promise<string> {
     const providerId = this.configService.getProviderId();
-    const data = {
+    const data: TransactionData<PublishSIWFSignupRequest> = {
       ...request,
       type,
       providerId,
@@ -69,10 +78,10 @@ export class AccountsService {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async signInWithFrequency(request: WalletLoginRequestDTO): Promise<WalletLoginResponseDTO> {
+  async signInWithFrequency(request: WalletLoginRequest): Promise<WalletLoginResponse> {
     const api = await this.blockchainService.getApi();
     const providerId = this.configService.getProviderId();
-    let response: WalletLoginResponseDTO;
+    let response: WalletLoginResponse;
     if (request.signUp) {
       try {
         const payload = await validateSignup(api, request.signUp, providerId.toString());

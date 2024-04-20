@@ -1,6 +1,8 @@
+/* eslint-disable max-classes-per-file */
 import { BlockHash, Hash } from '@polkadot/types/interfaces';
 import { PublishHandleRequest } from './handles.dto';
 import { SIWFSignupRequest } from './wallet.login.response.dto';
+import { TransactionType } from '../enums';
 
 export type TransactionData<RequestType = PublishHandleRequest | SIWFSignupRequest> = RequestType & {
   providerId: number;
@@ -20,5 +22,6 @@ export class TransactionRepsonse {
 
 export class TransactionNotification {
   msaId: number;
+
   data: TxMonitorJob;
 }

@@ -1,8 +1,10 @@
 import { SignInResponse, SignUpResponse } from '@amplica-labs/siwf';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
+import { Transaction } from 'ioredis/built/transaction';
+import { TransactionType } from '../enums';
 
-export class WalletLoginRequestDTO {
+export class WalletLoginRequest {
   @ApiProperty({
     description: 'The wallet login request information',
     type: 'object',
@@ -45,3 +47,9 @@ export class WalletLoginRequestDTO {
   @ApiProperty()
   signUp: SignUpResponse;
 }
+
+export type SIWFSignupRequest = WalletLoginRequest & {
+  type: TransactionType.SIWF_SIGNUP;
+};
+
+export type PublishSIWFSignupRequest = SIWFSignupRequest;

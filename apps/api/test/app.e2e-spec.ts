@@ -6,7 +6,7 @@ import request from 'supertest';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiModule } from '../src/api.module';
 import { KeyType } from '../../../libs/common/src';
-import { WalletLoginRequestDTO } from '../../../libs/common/src/types/dtos/wallet.login.request.dto';
+import { WalletLoginRequest } from '../../../libs/common/src/types/dtos/wallet.login.request.dto';
 
 describe('Account Service E2E request verification!', () => {
   let app: INestApplication;
@@ -33,7 +33,7 @@ describe('Account Service E2E request verification!', () => {
 
   describe('(POST) /accounts/login', () => {
     it('Sign Up With Frequency request should work', async () => {
-      const siwfRequest: WalletLoginRequestDTO = {
+      const siwfRequest: WalletLoginRequest = {
         signIn: {},
         signUp: {
           extrinsics: [
@@ -61,7 +61,7 @@ describe('Account Service E2E request verification!', () => {
         .expect((res) => expect(res.body.accessToken).toContain('-'));
     });
     it('Sign In With Frequency request should work', async () => {
-      const siwfRequest: WalletLoginRequestDTO = {
+      const siwfRequest: WalletLoginRequest = {
         signIn: {
           siwsPayload: {
             message:

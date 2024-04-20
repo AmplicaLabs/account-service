@@ -82,7 +82,9 @@ export class TxnNotifierService extends BaseConsumer {
               this.logger.debug(`Signed up for ${job.data.providerId}.`);
               break;
             default:
-              this.logger.debug(`Unknown transaction type: ${job.data.type}`);
+              // TODO: Property 'type' does not exist on type 'never'
+              // Resolve this error to log the wrong type.
+              this.logger.error(`Unknown transaction type on job.data: ${job.data}`);
               break;
           }
 
