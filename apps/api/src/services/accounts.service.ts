@@ -67,7 +67,7 @@ export class AccountsService {
       referenceId: this.calculateJobId(request),
     };
 
-    const job = await this.transactionPublishQueue.add(`Transaction Job - ${data.referenceId}`, data, {
+    const job = await this.transactionPublishQueue.add(`SIWF Transaction Job - ${data.referenceId}`, data, {
       jobId: data.referenceId,
     });
     this.logger.debug(`enqueue job: ${job}`);
@@ -90,13 +90,19 @@ export class AccountsService {
     let response: WalletLoginResponse;
     if (request.signUp) {
       try {
-        const payload = await validateSignup(api, request.signUp, providerId.toString());
-        // Pass all this data to the transaction publisher queue
-        const referenceId = await this.enqueueRequest(payload, TransactionType.SIWF_SIGNUP);
-
+        const siwfPayload = await validateSignup(api, request.signUp, providerId.toString());
         response = {
-          accessToken: await this.createAuthToken(payload.publicKey),
+          accessToken: await this.createAuthToken(siwfPayload.publicKey),
           expires: Date.now() + 60 * 60 * 24,
+        };
+        const jobPayload = {
+          ...siwfPayload,
+          ...response,
+        };
+        // Pass all this data to the transaction publisher queue
+        const referenceId = await this.enqueueRequest(jobPayload, TransactionType.SIWF_SIGNUP);
+        response = {
+          ...response,
           referenceId: referenceId.toString(),
         };
         return response;

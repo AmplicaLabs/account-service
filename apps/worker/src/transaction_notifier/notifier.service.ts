@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Job, Queue } from 'bullmq';
 import Redis from 'ioredis';
 import { MILLISECONDS_PER_SECOND } from 'time-constants';
-import { RegistryError } from '@polkadot/types/types';
+import { IEventData, RegistryError } from '@polkadot/types/types';
 import axios from 'axios';
 
 import { ConfigService } from '../../../../libs/common/src/config/config.service';
@@ -69,17 +69,81 @@ export class TxnNotifierService extends BaseConsumer {
         if (txResult.success) {
           this.logger.verbose(`Successfully found ${job.data.txHash} found in block ${txResult.blockHash}`);
           const webhook = await this.getWebhook();
+          let webhookResponse;
 
           // TODO: Set the appropriate payload data for the webhook callback
           switch (job.data.type) {
             case TransactionType.CHANGE_HANDLE:
-              this.logger.debug(`Changed handle for ${job.data.providerId}.`);
-              break;
             case TransactionType.CREATE_HANDLE:
-              this.logger.debug(`Created handle for ${job.data.providerId}.`);
+              if (!txResult.events) {
+                this.logger.error('No Handle events found in tx result');
+              } else {
+                let handle: string = '';
+                txResult.events.forEach((record) => {
+                  const { event } = record;
+                  const eventName = event.section;
+                  const { method } = event;
+                  const { data } = event;
+                  // Grab the handle and msa id from the event data
+                  if (eventName.search('handles') !== -1 && method.search('HandleClaimed') !== -1) {
+                    data as IEventData;
+                    const msaId = data[0].toString();
+                    handle = Buffer.from(data[1].toString(), 'hex').toString('utf-8');
+                    this.logger.debug(`Handle created: ${handle} for msaId: ${msaId}`);
+                  }
+                });
+
+                webhookResponse = {
+                  referenceId: job.data.referenceId,
+                  type: job.data.type,
+                  accountId: job.data.accountId,
+                  handle,
+                  providerId: job.data.providerId,
+                };
+              }
+              this.logger.debug(`${job.data.type} finalized for ${job.data.accountId}.`);
               break;
             case TransactionType.SIWF_SIGNUP:
-              this.logger.debug(`Signed up for ${job.data.providerId}.`);
+              if (!txResult.events) {
+                this.logger.error('No SIWF events found in tx result');
+              } else {
+                let msaId: string = '';
+                let address = '';
+                let handle: string = '';
+                let newProvider: string = '';
+                txResult.events.forEach((record) => {
+                  const { event } = record;
+                  const eventName = event.section;
+                  const { method } = event;
+                  const { data } = event;
+                  if (eventName.search('msa') !== -1 && method.search('MsaCreated') !== -1) {
+                    data as IEventData;
+                    msaId = data[0].toString();
+                    address = data[1].toString();
+                    this.logger.debug(`SIWF MSA created: ${msaId} for address: ${address}`);
+                  }
+                  if (eventName.search('handles') !== -1 && method.search('HandleClaimed') !== -1) {
+                    data as IEventData;
+                    handle = data[1].toString();
+                    this.logger.debug(`SIWF Handle created: ${handle} for msaId: ${msaId}`);
+                  }
+                  if (eventName.search('msa') !== -1 && method.search('DelegationGranted') !== -1) {
+                    data as IEventData;
+                    newProvider = data[0].toString();
+                    const owner = data[1].toString();
+                    this.logger.debug(`SIWF Delegation granted: ${owner} to ${newProvider}`);
+                  }
+                });
+                webhookResponse = {
+                  referenceId: job.data.referenceId,
+                  type: TransactionType.SIWF_SIGNUP,
+                  accountId: address,
+                  msaId,
+                  handle,
+                  providerId: newProvider,
+                };
+              }
+              this.logger.debug(`${job.data.publicKey} Signed up for ${job.data.id}.`);
               break;
             default:
               // TODO: Property 'type' does not exist on type 'never'
@@ -88,19 +152,14 @@ export class TxnNotifierService extends BaseConsumer {
               break;
           }
 
-          const notification: TransactionNotification = {
-            msaId: job.data.providerId,
-            data: job.data,
-          };
-
           let retries = 0;
           while (retries < this.configService.healthCheckMaxRetries) {
             try {
               this.logger.debug(`Sending transaction notification to webhook: ${webhook}`);
-              this.logger.debug(`Transaction: ${JSON.stringify(notification)}`);
+              this.logger.debug(`Transaction: ${JSON.stringify(webhookResponse)}`);
               // eslint-disable-next-line no-await-in-loop
-              await axios.post(webhook, notification);
-              this.logger.debug(`Notification sent to webhook: ${webhook}`);
+              await axios.post(webhook, webhookResponse);
+              this.logger.debug(`Transaction Notification sent to webhook: ${webhook}`);
               break;
             } catch (error) {
               this.logger.error(`Failed to send notification to webhook: ${webhook}`);
