@@ -1,5 +1,6 @@
 /* eslint-disable no-shadow */
 /* eslint-disable max-classes-per-file */
+// eslint-disable-next-line no-shadow
 export enum AccountChangeType {
   CHANGE_HANDLE = 'CHANGE_HANDLE',
   CREATE_HANDLE = 'CREATE_HANDLE',

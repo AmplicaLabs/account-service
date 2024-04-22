@@ -9,8 +9,14 @@ import { QueueConstants, TransactionData, TransactionType } from '../../../../li
 import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
 import type { AccountResponse } from '../../../../libs/common/src/types/dtos/accounts.dto';
 import { ConfigService } from '../../../../libs/common/src/config/config.service';
-import { PublishSIWFSignupRequest, WalletLoginRequest } from '../../../../libs/common/src/types/dtos/wallet.login.request.dto';
-import { SIWFSignupRequest, WalletLoginResponse } from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
+import {
+  PublishSIWFSignupRequest,
+  WalletLoginRequest,
+} from '../../../../libs/common/src/types/dtos/wallet.login.request.dto';
+import {
+  SIWFSignupRequest,
+  WalletLoginResponse,
+} from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
 
 export type RequestAccount = { publicKey: string; msaId?: string };
 @Injectable()
@@ -53,7 +59,7 @@ export class AccountsService {
   }
 
   async enqueueRequest(request, type: TransactionType): Promise<string> {
-    const providerId = this.configService.getProviderId();
+    const { providerId } = this.configService;
     const data: TransactionData<PublishSIWFSignupRequest> = {
       ...request,
       type,
@@ -80,7 +86,7 @@ export class AccountsService {
   // eslint-disable-next-line class-methods-use-this
   async signInWithFrequency(request: WalletLoginRequest): Promise<WalletLoginResponse> {
     const api = await this.blockchainService.getApi();
-    const providerId = this.configService.getProviderId();
+    const { providerId } = this.configService;
     let response: WalletLoginResponse;
     if (request.signUp) {
       try {

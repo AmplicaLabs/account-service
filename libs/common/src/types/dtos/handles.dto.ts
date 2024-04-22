@@ -1,6 +1,5 @@
 /* eslint-disable max-classes-per-file */
 import { IsNotEmpty } from 'class-validator';
-import { AccountId } from '@polkadot/types/interfaces';
 import { ApiProperty } from '@nestjs/swagger';
 import { HandleResponse } from '@frequency-chain/api-augment/interfaces';
 import { Bytes } from '@polkadot/types';
