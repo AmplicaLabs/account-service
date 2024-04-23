@@ -33,7 +33,7 @@ export class AccountsController {
     }
   }
 
-  @Post('sign-in-with-frequency')
+  @Post('siwf')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Request to sign in with Frequency' })
   @ApiCreatedResponse({ description: 'Signed in successfully', type: WalletLoginResponse })
