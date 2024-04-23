@@ -47,11 +47,6 @@ export class DeleteKeysRequest {
   key: string;
 }
 
-export type DeleteKeysTxRequest = DeleteKeysRequest & {
-  key: string;
-  type: TransactionType.DELETE_KEY;
-};
-
-export type PublishKeysRequest = AddKeysTxRequest | DeleteKeysTxRequest;
+export type PublishKeysRequest = AddKeysTxRequest;
 
 export type KeysResponse = KeyInfoResponse['msa_keys'];

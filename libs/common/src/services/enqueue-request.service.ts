@@ -25,7 +25,7 @@ export class EnqueueService {
   }
 
   async enqueueRequest<RequestType>(request: RequestType): Promise<TransactionResponse> {
-    const providerId = this.configService.getProviderId();
+    const { providerId } = this.configService;
     const data: TransactionData<RequestType> = {
       ...request,
       providerId,

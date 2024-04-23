@@ -303,6 +303,7 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     blockHash?: BlockHash;
     capacityWithDrawn?: string;
     error?: RegistryError;
+    events?: Vec<FrameSystemEventRecord>;
   }> {
     const txReceiptPromises: Promise<{
       found: boolean;
@@ -310,6 +311,7 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
       blockHash?: BlockHash;
       capacityWithDrawn?: string;
       error?: RegistryError;
+      events?: Vec<FrameSystemEventRecord>;
     }>[] = blockList.map(async (blockNumber) => {
       const blockHash = await this.getBlockHash(blockNumber);
       const block = await this.getBlock(blockHash);
@@ -326,15 +328,13 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
       let isTxSuccess = false;
       let totalBlockCapacity: bigint = 0n;
       let txError: RegistryError | undefined;
+      const events = await eventsPromise;
 
       try {
-        const events = await eventsPromise;
-
         events.forEach((record) => {
           const { event } = record;
           const eventName = event.section;
-          const { method } = event;
-          const { data } = event;
+          const { method, data } = event;
           this.logger.debug(`Received event: ${eventName} ${method} ${data}`);
 
           // find capacity withdrawn event
@@ -343,6 +343,29 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
             // eslint-disable-next-line new-cap
             const currentCapacity: u128 = new u128(this.api.registry, data[1]);
             totalBlockCapacity += currentCapacity.toBigInt();
+          }
+
+          // SIWF Events:
+          //   MsaCreated
+          //   MsaDelegated
+          //   HandleClaimed
+          if (
+            eventName.search('msa') !== -1 &&
+            (method.search('MsaCreated') !== -1 || method.search('MsaDelegated') !== -1)
+          ) {
+            events.push(record);
+          }
+
+          // Handle Events:
+          //   HandleClaimed
+          if (eventName.search('handles') !== -1 && method.search('HandleClaimed') !== -1) {
+            events.push(record);
+          }
+
+          // Key Events:
+          //   KeyAdded
+          if (eventName.search('keys') !== -1 && method.search('KeyAdded') !== -1) {
+            events.push(record);
           }
 
           // check custom success events
@@ -372,6 +395,7 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
         blockHash,
         capacityWithDrawn: totalBlockCapacity.toString(),
         error: txError,
+        events,
       };
     });
     const results = await Promise.all(txReceiptPromises);
