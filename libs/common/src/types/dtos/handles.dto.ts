@@ -2,7 +2,6 @@
 import { IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { HandleResponse } from '@frequency-chain/api-augment/interfaces';
-import { Bytes } from '@polkadot/types';
 import { TransactionType } from '../enums';
 
 class HandlePayload {

@@ -1,6 +1,5 @@
-import { SignInResponse, SignUpResponse } from '@amplica-labs/siwf';
+import { SignInResponse, SignUpResponse, ValidSignUpPayloads } from '@amplica-labs/siwf';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
 import { TransactionType } from '../enums';
 
 export class WalletLoginRequest {
@@ -47,12 +46,10 @@ export class WalletLoginRequest {
   signUp: SignUpResponse;
 }
 
-export type SIWFSignupRequest = WalletLoginRequest & {
+export type SIWFSignupRequest = ValidSignUpPayloads & {
   type: TransactionType.SIWF_SIGNUP;
 };
 
 export type PublishSIWFSignupRequest = SIWFSignupRequest & {
   providerId: number;
-  accessToken: string;
-  expires: number;
 };

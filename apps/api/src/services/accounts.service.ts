@@ -1,11 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRedis } from '@liaoliaots/nestjs-redis';
-import Redis from 'ioredis';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { Hash, createHash, randomUUID } from 'crypto';
-import { validateSignin, validateSignup } from '@amplica-labs/siwf';
-import { QueueConstants, TransactionData, TransactionType } from '../../../../libs/common/src';
+import { createHash } from 'crypto';
+import { ValidSignUpPayloads, validateSignin, validateSignup } from '@amplica-labs/siwf';
+import { QueueConstants, TransactionData, TransactionResponse, TransactionType } from '../../../../libs/common/src';
 import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
 import type { AccountResponse } from '../../../../libs/common/src/types/dtos/accounts.dto';
 import { ConfigService } from '../../../../libs/common/src/config/config.service';
@@ -13,21 +11,14 @@ import {
   PublishSIWFSignupRequest,
   WalletLoginRequest,
 } from '../../../../libs/common/src/types/dtos/wallet.login.request.dto';
-import {
-  SIWFSignupRequest,
-  WalletLoginResponse,
-} from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
+import { WalletLoginResponse } from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
 
 export type RequestAccount = { publicKey: string; msaId?: string };
 @Injectable()
 export class AccountsService {
   private readonly logger: Logger;
 
-  // uuid auth token to Public Key
-  private authTokenRegistry: Map<string, RequestAccount> = new Map();
-
   constructor(
-    // @InjectRedis() private redis: Redis,
     @InjectQueue(QueueConstants.TRANSACTION_PUBLISH_QUEUE)
     private transactionPublishQueue: Queue,
     private configService: ConfigService,
@@ -35,17 +26,6 @@ export class AccountsService {
   ) {
     this.logger = new Logger(this.constructor.name);
   }
-
-  /**
-   * Creates an authentication token for the given public key.
-   * @param publicKey - The public key associated with the authentication token.
-   * @returns A Promise that resolves to the generated authentication token.
-   */
-  private createAuthToken = async (publicKey: string): Promise<string> => {
-    const uuid = randomUUID();
-    this.authTokenRegistry.set(uuid, { publicKey });
-    return uuid;
-  };
 
   /**
    * Calculates the job ID based on the provided job object.
@@ -58,11 +38,11 @@ export class AccountsService {
     return createHash('sha1').update(stringVal).digest('base64url');
   }
 
-  async enqueueRequest(request, type: TransactionType): Promise<string> {
+  async enqueueRequest(request: ValidSignUpPayloads, type: TransactionType): Promise<TransactionResponse> {
     const { providerId } = this.configService;
     const data: TransactionData<PublishSIWFSignupRequest> = {
       ...request,
-      type,
+      type: TransactionType.SIWF_SIGNUP,
       providerId,
       referenceId: this.calculateJobId(request),
     };
@@ -70,8 +50,10 @@ export class AccountsService {
     const job = await this.transactionPublishQueue.add(`SIWF Transaction Job - ${data.referenceId}`, data, {
       jobId: data.referenceId,
     });
-    this.logger.debug(`enqueue job: ${job}`);
-    return data.referenceId;
+    this.logger.debug(`enqueueRequest job: ${job}`);
+    return {
+      referenceId: data.referenceId,
+    };
   }
 
   async getAccount(msaId: number): Promise<AccountResponse> {
@@ -91,18 +73,12 @@ export class AccountsService {
     if (request.signUp) {
       try {
         const siwfPayload = await validateSignup(api, request.signUp, providerId.toString());
-        response = {
-          accessToken: await this.createAuthToken(siwfPayload.publicKey),
-          expires: Date.now() + 60 * 60 * 24,
-        };
         const jobPayload = {
           ...siwfPayload,
-          ...response,
         };
         // Pass all this data to the transaction publisher queue
         const referenceId = await this.enqueueRequest(jobPayload, TransactionType.SIWF_SIGNUP);
         response = {
-          ...response,
           referenceId: referenceId.toString(),
         };
         return response;
@@ -113,13 +89,9 @@ export class AccountsService {
     } else if (request.signIn) {
       try {
         const parsedSignin = await validateSignin(api, request.signIn, 'localhost');
-        const accessToken = await this.createAuthToken(parsedSignin.publicKey);
-        // TODO: expiration should be configurable
-        const expires = Date.now() + 60 * 60 * 24;
         response = {
-          accessToken,
-          expires,
           msaId: parsedSignin.msaId,
+          publicKey: parsedSignin.publicKey,
         };
         return response;
       } catch (e) {

@@ -4,20 +4,14 @@ import { IsNotEmpty, IsOptional } from 'class-validator';
 import { TransactionType } from '../enums';
 
 export class WalletLoginResponse {
-  @IsNotEmpty()
-  accessToken: string;
-
-  @IsNotEmpty()
-  expires: number;
-
   @IsOptional()
   referenceId?: string;
 
   @IsOptional()
   msaId?: string;
 
-  // @IsNotEmpty()
-  // handle: string;
+  @IsOptional()
+  publicKey?: string;
 }
 
 export type SignUpResponse = WalletLoginResponse & {

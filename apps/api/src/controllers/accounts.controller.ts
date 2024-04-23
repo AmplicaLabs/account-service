@@ -8,8 +8,7 @@ import { WalletLoginRequest } from '../../../../libs/common/src/types/dtos/walle
 @Controller('accounts')
 @ApiTags('accounts')
 export class AccountsController {
-  // private readonly logger: Logger;
-  protected logger: Logger;
+  private readonly logger: Logger;
 
   constructor(private accountsService: AccountsService) {
     this.logger = new Logger(this.constructor.name);
@@ -27,30 +26,26 @@ export class AccountsController {
    */
   async getAccount(@Param('msaId') msaId: number): Promise<AccountResponse> {
     try {
-      const account = await this.accountsService.getAccount(msaId);
-      return account;
+      return await this.accountsService.getAccount(msaId);
     } catch (error) {
       this.logger.error(error);
       throw new HttpException('Failed to find the account', HttpStatus.BAD_REQUEST);
     }
   }
 
-  @Post('login')
+  @Post('sign-in-with-frequency')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Request to sign in with Frequency' })
   @ApiOkResponse({ description: 'Signed in successfully', type: WalletLoginResponse })
   @ApiBody({ type: WalletLoginRequest })
-  async signInWithFrequency(
-    @Body() walletLoginRequestDTO: WalletLoginRequest,
-  ): Promise<WalletLoginResponse | Response> {
+  async signInWithFrequency(@Body() walletLoginRequest: WalletLoginRequest): Promise<WalletLoginResponse | Response> {
     try {
-      this.logger.log('Received Sign-In With Frequency request');
-      this.logger.debug(`walletLoginRequestDTO: ${JSON.stringify(walletLoginRequestDTO)}`);
-      const loginResponse = await this.accountsService.signInWithFrequency(walletLoginRequestDTO);
-      return loginResponse;
+      this.logger.log(`Received Sign-In With Frequency request: ${JSON.stringify(walletLoginRequest)}`);
+      return await this.accountsService.signInWithFrequency(walletLoginRequest);
     } catch (error) {
-      this.logger.error(`Failed to Sign In With Frequency: ${error}`);
-      throw new HttpException('Failed to Sign In With Frequency', HttpStatus.BAD_REQUEST);
+      const errorMessage = 'Failed to Sign In With Frequency';
+      this.logger.error(`${errorMessage}: ${error}`);
+      throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
     }
   }
 }

@@ -1,6 +1,6 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { InjectQueue, Processor } from '@nestjs/bullmq';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Job, Queue } from 'bullmq';
 import Redis from 'ioredis';
 import { MILLISECONDS_PER_SECOND } from 'time-constants';
@@ -71,7 +71,6 @@ export class TxnNotifierService extends BaseConsumer {
           const webhook = await this.getWebhook();
           let webhookResponse;
 
-          // TODO: Set the appropriate payload data for the webhook callback
           switch (job.data.type) {
             case TransactionType.CHANGE_HANDLE:
             case TransactionType.CREATE_HANDLE:
@@ -142,8 +141,8 @@ export class TxnNotifierService extends BaseConsumer {
                   handle,
                   providerId: newProvider,
                 };
+                this.logger.debug(`${address} Signed up for ${job.data.id}.`);
               }
-              this.logger.debug(`${job.data.publicKey} Signed up for ${job.data.id}.`);
               break;
             default:
               // TODO: Property 'type' does not exist on type 'never'

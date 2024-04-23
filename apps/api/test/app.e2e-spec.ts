@@ -53,12 +53,7 @@ describe('Account Service E2E request verification!', () => {
         },
       };
 
-      return request(app.getHttpServer())
-        .post(`/accounts/login`)
-        .send(siwfRequest)
-        .expect(201)
-        .expect((res) => expect(res.body.expires).toBeGreaterThan(Date.now()))
-        .expect((res) => expect(res.body.accessToken).toContain('-'));
+      return request(app.getHttpServer()).post(`/accounts/login`).send(siwfRequest).expect(201);
     });
     it('Sign In With Frequency request should work', async () => {
       const siwfRequest: WalletLoginRequest = {
@@ -75,12 +70,7 @@ describe('Account Service E2E request verification!', () => {
         },
       };
 
-      return request(app.getHttpServer())
-        .post(`/accounts/login`)
-        .send(siwfRequest)
-        .expect(201)
-        .expect((res) => expect(res.body.expires).toBeGreaterThan(Date.now()))
-        .expect((res) => expect(res.body.accessToken).toContain('-'));
+      return request(app.getHttpServer()).post(`/accounts/sign-in-with-frequency`).send(siwfRequest).expect(201);
     });
   });
 
