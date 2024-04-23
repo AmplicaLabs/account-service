@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, HttpCode, HttpStatus, Logger, Param, HttpException } from '@nestjs/common';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AccountsService } from '../services/accounts.service';
 import { AccountResponse } from '../../../../libs/common/src/types/dtos/accounts.dto';
 import { WalletLoginResponse } from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
@@ -36,7 +36,7 @@ export class AccountsController {
   @Post('sign-in-with-frequency')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Request to sign in with Frequency' })
-  @ApiOkResponse({ description: 'Signed in successfully', type: WalletLoginResponse })
+  @ApiCreatedResponse({ description: 'Signed in successfully', type: WalletLoginResponse })
   @ApiBody({ type: WalletLoginRequest })
   async signInWithFrequency(@Body() walletLoginRequest: WalletLoginRequest): Promise<WalletLoginResponse | Response> {
     try {

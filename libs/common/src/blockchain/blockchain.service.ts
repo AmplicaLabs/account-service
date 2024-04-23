@@ -312,8 +312,7 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
         events.forEach((record) => {
           const { event } = record;
           const eventName = event.section;
-          const { method } = event;
-          const { data } = event;
+          const { method, data } = event;
           this.logger.debug(`Received event: ${eventName} ${method} ${data}`);
 
           // find capacity withdrawn event
@@ -332,25 +331,18 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
             eventName.search('msa') !== -1 &&
             (method.search('MsaCreated') !== -1 || method.search('MsaDelegated') !== -1)
           ) {
-            // REMOVE:
-            this.logger.debug(`Found MsaDelegated|MsaCreated event ${eventName} ${method}`);
             events.push(record);
           }
 
           // Handle Events:
           //   HandleClaimed
-          //   HandleChanged??
           if (eventName.search('handles') !== -1 && method.search('HandleClaimed') !== -1) {
-            // REMOVE:
-            this.logger.debug(`Found HandleClaimed event ${eventName} ${method}`);
             events.push(record);
           }
 
           // Key Events:
           //   KeyAdded
           if (eventName.search('keys') !== -1 && method.search('KeyAdded') !== -1) {
-            // REMOVE:
-            this.logger.debug(`Found KeyAdded event ${eventName} ${method}`);
             events.push(record);
           }
 

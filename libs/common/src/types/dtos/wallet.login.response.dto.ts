@@ -4,8 +4,8 @@ import { IsNotEmpty, IsOptional } from 'class-validator';
 import { TransactionType } from '../enums';
 
 export class WalletLoginResponse {
-  @IsOptional()
-  referenceId?: string;
+  @IsNotEmpty()
+  referenceId: string;
 
   @IsOptional()
   msaId?: string;
