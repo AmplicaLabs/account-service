@@ -299,16 +299,20 @@ dependencies = [
 
 [[package]]
 name = "apistos"
-version = "0.1.7"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc37725599e0869cfdb5b8014d831036782fa77c860ea9b9df689205106a8808"
+checksum = "94e21b2af991880f5204a0b3de8a245795b09a28d7b15e5caacb79163ffaf249"
 dependencies = [
  "actix-service",
  "actix-web",
  "apistos-core",
  "apistos-gen",
  "apistos-models",
+ "apistos-plugins",
+ "apistos-rapidoc",
+ "apistos-redoc",
  "apistos-schemars",
+ "apistos-swagger-ui",
  "indexmap",
  "log",
  "md5",
@@ -320,9 +324,9 @@ dependencies = [
 
 [[package]]
 name = "apistos-core"
-version = "0.1.7"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d4d1fb9396da4fe0eb55b668a0c3acd2b857a604faff274269b5d7bdb49f0fe"
+checksum = "7c5f1a68e89d9db1576134abceab3024fc67f60fd0950738f2111728da028859"
 dependencies = [
  "actix-multipart",
  "actix-web",
@@ -340,9 +344,9 @@ dependencies = [
 
 [[package]]
 name = "apistos-gen"
-version = "0.1.7"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2a97db2fe8a9e539f5dd25703c70f2761218f3a862cd9e52422101cbea83ee9"
+checksum = "f05c7d5caadd5ace07ad966dd39057cda0782a314968bdce65912e9b31e50494"
 dependencies = [
  "actix-web",
  "convert_case 0.6.0",
@@ -355,14 +359,41 @@ dependencies = [
 
 [[package]]
 name = "apistos-models"
-version = "0.1.7"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28d4835484449b3d433b58f733813779b31398f59e9b4a24ab91b569e86cb965"
+checksum = "cffef3c24da4fea301568173832f3767ba195cdcae02aa32dd26f754260a1457"
 dependencies = [
  "apistos-schemars",
  "indexmap",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "apistos-plugins"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd0d772fc56f9ebe68a69c82c497da4d3eb250dc20b913fcb2a0e41a09d2a972"
+dependencies = [
+ "actix-web",
+]
+
+[[package]]
+name = "apistos-rapidoc"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69ec9c47a1f3e6be5c25780989af08c75ea9db52805f6b92c82bd87d37caa12a"
+dependencies = [
+ "apistos-plugins",
+]
+
+[[package]]
+name = "apistos-redoc"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "79000dbe5faa537cdcdc3ff55da5f1ad453b7fd208cb28571d92f73b8e51faf0"
+dependencies = [
+ "apistos-plugins",
 ]
 
 [[package]]
@@ -391,6 +422,15 @@ dependencies = [
  "quote",
  "serde_derive_internals",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "apistos-swagger-ui"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57c12687d1ccd901b941f7867145442fd964932937ffb2a05fd58f0c763d0a43"
+dependencies = [
+ "apistos-plugins",
 ]
 
 [[package]]
@@ -558,12 +598,13 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.94"
+version = "1.0.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17f6e324229dc011159fcc089755d1e2e216a90d43a7dea6853ca740b84f35e7"
+checksum = "d32a725bc159af97c3e629873bb9f88fb8cf8a4867175f76dc987815ea07c83b"
 dependencies = [
  "jobserver",
  "libc",
+ "once_cell",
 ]
 
 [[package]]
@@ -1076,9 +1117,9 @@ checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
 
 [[package]]
 name = "jobserver"
-version = "0.1.30"
+version = "0.1.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "685a7d121ee3f65ae4fddd72b25a04bb36b6af81bc0828f7d5434c0fe60fa3a2"
+checksum = "d2b099aaa34a9751c5bf0878add70444e1ed2dd73f347be99003d4577277de6e"
 dependencies = [
  "libc",
 ]
@@ -1495,7 +1536,6 @@ dependencies = [
  "apistos-schemars",
  "serde",
  "serde_json",
- "uuid",
 ]
 
 [[package]]
@@ -1661,9 +1701,9 @@ dependencies = [
 
 [[package]]
 name = "signal-hook-registry"
-version = "1.4.1"
+version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8229b473baa5980ac72ef434c4415e70c4b5e71b423043adb4ba059f89c99a1"
+checksum = "a9e9e0b4211b72e7b8b6e85c807d36c212bdb33ea8587f7569562a84df5465b1"
 dependencies = [
  "libc",
 ]

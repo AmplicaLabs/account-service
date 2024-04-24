@@ -26,7 +26,12 @@ pub struct EchoPayload {
     pub handle: String,
 }
 
-#[api_operation(summary = "Echo payload")]
+#[api_operation(
+    tag = "webhook",
+    summary = "Echo payload",
+    description = "Echoes the payload back to the client",
+    error_code = 400,
+)]
 pub(crate) async fn echo_payload(body: Json<WebhookCallback>) -> Result<CreatedJson<EchoPayload>, Error> {
     println!("Received payload: {}", serde_json::to_string_pretty(&body).unwrap());
     let callback_msg = body.into_inner();
@@ -39,7 +44,8 @@ pub(crate) async fn echo_payload(body: Json<WebhookCallback>) -> Result<CreatedJ
     Ok(CreatedJson(payload))
 }
 
-pub(crate) async fn health_check() -> Result<Json<HealthResponse>, Error>{
+#[api_operation(summary = "Health check")]
+pub(crate) async fn health_check() -> Result<Json<HealthResponse>, Error> {
     println!("Health check");
     Ok(Json(HealthResponse {
         message: "Server is healthy".to_string(),
