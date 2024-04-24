@@ -109,7 +109,7 @@ export class TransactionPublisherService extends BaseConsumer implements OnAppli
       });
     } catch (error) {
       // @ts-ignore
-      this.logger.error('Hello world....', error, error?.stack);
+      this.logger.error('Unknown error encountered: ', error, error?.stack);
       throw error;
     } finally {
       await this.checkCapacity();

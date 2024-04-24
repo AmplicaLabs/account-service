@@ -1,10 +1,11 @@
 import { Controller, Get, Post, HttpCode, HttpStatus, Logger, Param, HttpException, Body } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { HandleResponse } from '@frequency-chain/api-augment/interfaces';
 import { HandlesService } from '../services/handles.service';
 import { HandleRequest, PublishHandleRequest } from '../../../../libs/common/src/types/dtos/handles.dto';
-import type { HandleResponse } from '@frequency-chain/api-augment/interfaces';
 import { TransactionType } from '../../../../libs/common/src/types/enums';
 import { EnqueueService } from '../../../../libs/common/src/services/enqueue-request.service';
+import { TransactionResponse } from '../../../../libs/common/src/types/dtos/transaction.dto';
 
 @Controller('handles')
 @ApiTags('handles')
@@ -29,14 +30,14 @@ export class HandlesController {
    * @returns A message that the handle creation is in progress.
    * @throws An error if the handle creation fails.
    */
-  async createHandle(@Body() createHandleRequest: HandleRequest) {
+  async createHandle(@Body() createHandleRequest: HandleRequest): Promise<TransactionResponse> {
     try {
-      const { referenceId } = await this.enqueueService.enqueueRequest<PublishHandleRequest>({
+      const response = await this.enqueueService.enqueueRequest<PublishHandleRequest>({
         ...createHandleRequest,
         type: TransactionType.CREATE_HANDLE,
       });
-      this.logger.log(`createHandle in progress. referenceId: ${referenceId}`);
-      return `createHandle in progress. referenceId: ${referenceId}`;
+      this.logger.log(`createHandle in progress. referenceId: ${response.referenceId}`);
+      return response;
     } catch (error) {
       this.logger.error(error);
       throw new Error('Failed to create handle');
@@ -54,14 +55,14 @@ export class HandlesController {
    * @returns A message that the handle change is in progress.
    * @throws An error if the handle creation fails.
    */
-  async changeHandle(@Body() changeHandleRequest: HandleRequest) {
+  async changeHandle(@Body() changeHandleRequest: HandleRequest): Promise<TransactionResponse> {
     try {
-      const { referenceId } = await this.enqueueService.enqueueRequest<PublishHandleRequest>({
+      const response = await this.enqueueService.enqueueRequest<PublishHandleRequest>({
         ...changeHandleRequest,
         type: TransactionType.CHANGE_HANDLE,
       });
-      this.logger.log(`changeHandle in progress. referenceId: ${referenceId}`);
-      return `changeHandle in progress. referenceId: ${referenceId}`;
+      this.logger.log(`changeHandle in progress. referenceId: ${response.referenceId}`);
+      return response;
     } catch (error) {
       this.logger.error(error);
       throw new Error('Failed to change handle');

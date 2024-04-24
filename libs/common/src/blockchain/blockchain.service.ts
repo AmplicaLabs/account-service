@@ -203,7 +203,7 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
 
     this.logger.debug(`claimHandlePayload: ${claimHandlePayload}`);
     this.logger.debug(`accountId: ${jobData.accountId}`);
-    
+
     const claimHandleProof: Sr25519Signature = { Sr25519: jobData.proof };
     this.logger.debug(`claimHandleProof: ${JSON.stringify(claimHandleProof)}`);
 

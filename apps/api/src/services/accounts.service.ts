@@ -57,7 +57,10 @@ export class AccountsService {
       try {
         const siwfPayload = await validateSignup(api, request.signUp, providerId.toString());
         // Pass all this data to the transaction publisher queue
-        const referenceId: WalletLoginResponse = await this.enqueueService.enqueueRequest({...siwfPayload, type: TransactionType.SIWF_SIGNUP});
+        const referenceId: WalletLoginResponse = await this.enqueueService.enqueueRequest({
+          ...siwfPayload,
+          type: TransactionType.SIWF_SIGNUP,
+        });
         return referenceId;
       } catch (e: any) {
         this.logger.error(`Failed Signup validation ${e.toString()}`);

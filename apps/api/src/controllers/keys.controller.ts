@@ -8,7 +8,7 @@ import {
   PublishKeysRequest,
 } from '../../../../libs/common/src/types/dtos/keys.dto';
 import { EnqueueService } from '../../../../libs/common/src/services/enqueue-request.service';
-import { TransactionType } from '../../../../libs/common/src';
+import { TransactionResponse, TransactionType } from '../../../../libs/common/src';
 
 @Controller('keys')
 @ApiTags('keys')
@@ -33,14 +33,14 @@ export class KeysController {
    * @returns A promise that resolves to an array of public keys associated with the given msaId.
    * @throws An error if no public keys can be found.
    */
-  async addKey(@Body() addKeysRequest: AddKeysRequest): Promise<string> {
+  async addKey(@Body() addKeysRequest: AddKeysRequest): Promise<TransactionResponse> {
     try {
-      const { referenceId } = await this.enqueueService.enqueueRequest<PublishKeysRequest>({
+      const response = await this.enqueueService.enqueueRequest<PublishKeysRequest>({
         ...addKeysRequest,
         type: TransactionType.ADD_KEY,
       });
-      this.logger.log(`AddKey in progress. referenceId: ${referenceId}`);
-      return `AddKey in progress. referenceId: ${referenceId}`;
+      this.logger.log(`AddKey in progress. referenceId: ${response.referenceId}`);
+      return response;
     } catch (error) {
       this.logger.error(error);
       throw new HttpException('Failed to find public keys for the given msaId', HttpStatus.BAD_REQUEST);

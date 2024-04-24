@@ -69,7 +69,7 @@ import { EnqueueService } from '../../../../libs/common/src/services/enqueue-req
       },
     ),
   ],
-  providers: [BullModule, TxnNotifierService, BlockchainService, EnqueueService, ConfigService],
+  providers: [TxnNotifierService, BlockchainService, EnqueueService, ConfigService],
   exports: [BullModule, TxnNotifierService, BlockchainService, EnqueueService, ConfigService],
 })
 export class TxnNotifierModule {}

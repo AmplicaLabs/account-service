@@ -2,10 +2,9 @@
 import { BlockHash, Hash } from '@polkadot/types/interfaces';
 import { PublishHandleRequest } from './handles.dto';
 import { PublishSIWFSignupRequest } from './wallet.login.request.dto';
-import { SIWFSignupRequest } from './wallet.login.response.dto';
 import { PublishKeysRequest } from './keys.dto';
 
-export type TransactionData<RequestType = PublishHandleRequest | SIWFSignupRequest | PublishKeysRequest> =
+export type TransactionData<RequestType = PublishHandleRequest | PublishSIWFSignupRequest | PublishKeysRequest> =
   RequestType & {
     providerId: number;
     referenceId: string;
