@@ -20,8 +20,6 @@ import { TransactionType } from '../../../../libs/common/src/types/enums';
 export class TxnNotifierService extends BaseConsumer {
   constructor(
     @InjectRedis() private cacheManager: Redis,
-    @InjectQueue(QueueConstants.TRANSACTION_NOTIFY_QUEUE)
-    private transactionNotifyQueue: Queue,
     private blockchainService: BlockchainService,
     private configService: ConfigService,
   ) {
@@ -50,8 +48,9 @@ export class TxnNotifierService extends BaseConsumer {
         { pallet: 'system', event: 'ExtrinsicSuccess' },
       ]);
       if (!txResult.found) {
-        this.logger.error(`Tx ${job.data.txHash} not found in block list`);
-        throw new Error(`Tx ${job.data.txHash} not found in block list`);
+        const message = `Tx ${job.data.txHash} not found in block list`;
+        this.logger.error(message);
+        throw new Error(message);
       } else {
         // Set current epoch capacity
         await this.setEpochCapacity(txCapacityEpoch, BigInt(txResult.capacityWithDrawn ?? 0n));
@@ -70,23 +69,26 @@ export class TxnNotifierService extends BaseConsumer {
           this.logger.verbose(`Successfully found ${job.data.txHash} found in block ${txResult.blockHash}`);
           const webhook = await this.getWebhook();
           let webhookResponse;
+          let msaId: string = '';
+          let address = '';
+          let handle: string = '';
+          let newProvider: string = '';
 
-          switch (job.data.type) {
+          const jobType: TxMonitorJob['type'] = job.data.type;
+          switch (jobType) {
             case TransactionType.CHANGE_HANDLE:
             case TransactionType.CREATE_HANDLE:
               if (!txResult.events) {
                 this.logger.error('No Handle events found in tx result');
               } else {
-                let handle: string = '';
                 txResult.events.forEach((record) => {
                   const { event } = record;
                   const eventName = event.section;
-                  const { method } = event;
-                  const { data } = event;
+                  const { method, data } = event;
                   // Grab the handle and msa id from the event data
                   if (eventName.search('handles') !== -1 && method.search('HandleClaimed') !== -1) {
                     data as IEventData;
-                    const msaId = data[0].toString();
+                    msaId = data[0].toString();
                     handle = Buffer.from(data[1].toString(), 'hex').toString('utf-8');
                     this.logger.debug(`Handle created: ${handle} for msaId: ${msaId}`);
                   }
@@ -95,26 +97,23 @@ export class TxnNotifierService extends BaseConsumer {
                 webhookResponse = {
                   referenceId: job.data.referenceId,
                   type: job.data.type,
-                  accountId: job.data.accountId,
+                  msaId,
                   handle,
                   providerId: job.data.providerId,
                 };
               }
-              this.logger.debug(`${job.data.type} finalized for ${job.data.accountId}.`);
+              this.logger.debug(
+                `Handles ${webhookResponse.type} finalized ${webhookResponse.handle} for msaId ${webhookResponse.msaId}.`,
+              );
               break;
             case TransactionType.SIWF_SIGNUP:
               if (!txResult.events) {
                 this.logger.error('No SIWF events found in tx result');
               } else {
-                let msaId: string = '';
-                let address = '';
-                let handle: string = '';
-                let newProvider: string = '';
                 txResult.events.forEach((record) => {
                   const { event } = record;
                   const eventName = event.section;
-                  const { method } = event;
-                  const { data } = event;
+                  const { method, data } = event;
                   if (eventName.search('msa') !== -1 && method.search('MsaCreated') !== -1) {
                     data as IEventData;
                     msaId = data[0].toString();
@@ -141,13 +140,13 @@ export class TxnNotifierService extends BaseConsumer {
                   handle,
                   providerId: newProvider,
                 };
-                this.logger.debug(`${address} Signed up for ${job.data.id}.`);
+                this.logger.debug(
+                  `SIWF ${address} Signed up handle ${webhookResponse.handle} for msaId ${webhookResponse.msaId}`,
+                );
               }
               break;
             default:
-              // TODO: Property 'type' does not exist on type 'never'
-              // Resolve this error to log the wrong type.
-              this.logger.error(`Unknown transaction type on job.data: ${job.data}`);
+              this.logger.error(`Unknown transaction type on job.data: ${jobType}`);
               break;
           }
 

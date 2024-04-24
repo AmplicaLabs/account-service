@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { createHash } from 'crypto';
-import { ValidSignUpPayloads, validateSignin, validateSignup } from '@amplica-labs/siwf';
-import { QueueConstants, TransactionData, TransactionResponse, TransactionType } from '../../../../libs/common/src';
+import { validateSignin, validateSignup } from '@amplica-labs/siwf';
+import { QueueConstants, TransactionType } from '../../../../libs/common/src';
 import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
 import type { AccountResponse } from '../../../../libs/common/src/types/dtos/accounts.dto';
 import { ConfigService } from '../../../../libs/common/src/config/config.service';
@@ -12,8 +12,8 @@ import {
   WalletLoginRequest,
 } from '../../../../libs/common/src/types/dtos/wallet.login.request.dto';
 import { WalletLoginResponse } from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
+import { EnqueueService } from '../../../../libs/common/src/services/enqueue-request.service';
 
-export type RequestAccount = { publicKey: string; msaId?: string };
 @Injectable()
 export class AccountsService {
   private readonly logger: Logger;
@@ -23,6 +23,7 @@ export class AccountsService {
     private transactionPublishQueue: Queue,
     private configService: ConfigService,
     private blockchainService: BlockchainService,
+    private enqueueService: EnqueueService,
   ) {
     this.logger = new Logger(this.constructor.name);
   }
@@ -38,24 +39,6 @@ export class AccountsService {
     return createHash('sha1').update(stringVal).digest('base64url');
   }
 
-  async enqueueRequest(request: ValidSignUpPayloads, type: TransactionType): Promise<TransactionResponse> {
-    const { providerId } = this.configService;
-    const data: TransactionData<PublishSIWFSignupRequest> = {
-      ...request,
-      type: TransactionType.SIWF_SIGNUP,
-      providerId,
-      referenceId: this.calculateJobId(request),
-    };
-
-    const job = await this.transactionPublishQueue.add(`SIWF Transaction Job - ${data.referenceId}`, data, {
-      jobId: data.referenceId,
-    });
-    this.logger.debug(`enqueueRequest job: ${job}`);
-    return {
-      referenceId: data.referenceId,
-    };
-  }
-
   async getAccount(msaId: number): Promise<AccountResponse> {
     const isValidMsaId = await this.blockchainService.isValidMsaId(msaId);
     if (isValidMsaId) {
@@ -69,19 +52,15 @@ export class AccountsService {
   async signInWithFrequency(request: WalletLoginRequest): Promise<WalletLoginResponse> {
     const api = await this.blockchainService.getApi();
     const { providerId } = this.configService;
-    let response: WalletLoginResponse;
     if (request.signUp) {
       try {
         const siwfPayload = await validateSignup(api, request.signUp, providerId.toString());
-        const jobPayload = {
-          ...siwfPayload,
-        };
         // Pass all this data to the transaction publisher queue
-        const referenceId = await this.enqueueRequest(jobPayload, TransactionType.SIWF_SIGNUP);
-        response = {
-          referenceId: referenceId.toString(),
-        };
-        return response;
+        const referenceId: WalletLoginResponse = await this.enqueueService.enqueueRequest<PublishSIWFSignupRequest>({
+          ...siwfPayload,
+          type: TransactionType.SIWF_SIGNUP,
+        });
+        return referenceId;
       } catch (e: any) {
         this.logger.error(`Failed Signup validation ${e.toString()}`);
         throw new Error('Failed to sign up');
@@ -89,7 +68,8 @@ export class AccountsService {
     } else if (request.signIn) {
       try {
         const parsedSignin = await validateSignin(api, request.signIn, 'localhost');
-        response = {
+        const response: WalletLoginResponse = {
+          referenceId: '0',
           msaId: parsedSignin.msaId,
           publicKey: parsedSignin.publicKey,
         };

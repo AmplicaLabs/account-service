@@ -5,7 +5,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiModule } from '../src/api.module';
-import { KeyType } from '../../../libs/common/src';
 import { WalletLoginRequest } from '../../../libs/common/src/types/dtos/wallet.login.request.dto';
 
 describe('Account Service E2E request verification!', () => {
@@ -31,7 +30,7 @@ describe('Account Service E2E request verification!', () => {
   it('(GET) /api/health', () =>
     request(app.getHttpServer()).get('/api/health').expect(200).expect({ status: 200, message: 'Service is healthy' }));
 
-  describe('(POST) /accounts/login', () => {
+  describe('(POST) /accounts/siwf', () => {
     it('Sign Up With Frequency request should work', async () => {
       const siwfRequest: WalletLoginRequest = {
         signIn: {},
@@ -53,7 +52,7 @@ describe('Account Service E2E request verification!', () => {
         },
       };
 
-      return request(app.getHttpServer()).post(`/accounts/login`).send(siwfRequest).expect(201);
+      return request(app.getHttpServer()).post(`/accounts/siwf`).send(siwfRequest).expect(201);
     });
     it('Sign In With Frequency request should work', async () => {
       const siwfRequest: WalletLoginRequest = {
@@ -70,7 +69,7 @@ describe('Account Service E2E request verification!', () => {
         },
       };
 
-      return request(app.getHttpServer()).post(`/accounts/sign-in-with-frequency`).send(siwfRequest).expect(201);
+      return request(app.getHttpServer()).post(`/accounts/siwf`).send(siwfRequest).expect(201);
     });
   });
 

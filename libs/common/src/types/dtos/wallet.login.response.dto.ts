@@ -4,8 +4,8 @@ import { IsNotEmpty, IsOptional } from 'class-validator';
 import { TransactionType } from '../enums';
 
 export class WalletLoginResponse {
-  @IsOptional()
-  referenceId?: string;
+  @IsNotEmpty()
+  referenceId: string;
 
   @IsOptional()
   msaId?: string;
@@ -17,11 +17,3 @@ export class WalletLoginResponse {
 export type SignUpResponse = WalletLoginResponse & {
   type: TransactionType.SIWF_SIGNUP;
 };
-
-export class SIWFSignupRequest {
-  calls: EncodedExtrinsic[];
-
-  publicKey: string;
-
-  type: TransactionType.SIWF_SIGNUP;
-}

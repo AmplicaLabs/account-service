@@ -105,7 +105,7 @@ async function main() {
     'Itemized',
     ['AppendOnly'],
   );
-  let sudoTx = api.tx.sudo.sudo(txSchema4);
+  const sudoTx = api.tx.sudo.sudo(txSchema4);
   await new Promise((resolve) => sudoTx.signAndSend(alice, { nonce: currentNonce }, sendStatusCb(resolve)));
   currentNonce++;
   console.log('Public Key Schema created');
