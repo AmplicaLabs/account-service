@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { createHash } from 'crypto';
-import { ValidSignUpPayloads, validateSignin, validateSignup } from '@amplica-labs/siwf';
-import { QueueConstants, TransactionData, TransactionResponse, TransactionType } from '../../../../libs/common/src';
+import { validateSignin, validateSignup } from '@amplica-labs/siwf';
+import { QueueConstants, TransactionType } from '../../../../libs/common/src';
 import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
 import type { AccountResponse } from '../../../../libs/common/src/types/dtos/accounts.dto';
 import { ConfigService } from '../../../../libs/common/src/config/config.service';
@@ -14,7 +14,6 @@ import {
 import { WalletLoginResponse } from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
 import { EnqueueService } from '../../../../libs/common/src/services/enqueue-request.service';
 
-export type RequestAccount = { publicKey: string; msaId?: string };
 @Injectable()
 export class AccountsService {
   private readonly logger: Logger;
@@ -27,17 +26,6 @@ export class AccountsService {
     private enqueueService: EnqueueService,
   ) {
     this.logger = new Logger(this.constructor.name);
-  }
-
-  /**
-   * Calculates the job ID based on the provided job object.
-   * @param jobWithoutId - The job object without the ID.
-   * @returns The calculated job ID.
-   */
-  // eslint-disable-next-line class-methods-use-this
-  public calculateJobId(jobWithoutId): string {
-    const stringVal = JSON.stringify(jobWithoutId);
-    return createHash('sha1').update(stringVal).digest('base64url');
   }
 
   async getAccount(msaId: number): Promise<AccountResponse> {
@@ -59,7 +47,6 @@ export class AccountsService {
         // Pass all this data to the transaction publisher queue
         const referenceId: WalletLoginResponse = await this.enqueueService.enqueueRequest<PublishSIWFSignupRequest>({
           ...siwfPayload,
-          providerId,
           type: TransactionType.SIWF_SIGNUP,
         });
         return referenceId;
