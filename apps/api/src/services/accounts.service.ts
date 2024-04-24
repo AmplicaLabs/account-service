@@ -59,6 +59,7 @@ export class AccountsService {
         // Pass all this data to the transaction publisher queue
         const referenceId: WalletLoginResponse = await this.enqueueService.enqueueRequest<PublishSIWFSignupRequest>({
           ...siwfPayload,
+          providerId,
           type: TransactionType.SIWF_SIGNUP,
         });
         return referenceId;
