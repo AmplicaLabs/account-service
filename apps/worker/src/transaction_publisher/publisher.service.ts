@@ -108,7 +108,8 @@ export class TransactionPublisherService extends BaseConsumer implements OnAppli
         delay: blockDelay,
       });
     } catch (error) {
-      this.logger.error(error);
+      // @ts-ignore
+      this.logger.error('Unknown error encountered: ', error, error?.stack);
       throw error;
     } finally {
       await this.checkCapacity();
