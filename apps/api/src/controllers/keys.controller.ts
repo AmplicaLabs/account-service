@@ -1,6 +1,6 @@
 import { Controller, Get, HttpCode, HttpStatus, Logger, Param, HttpException, Post, Body } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { KeysRequest, PublishKeysRequest } from '../../../../libs/common/src/types/dtos/keys.request.dto';
+import { AddKeyRequest, KeysRequest } from '../../../../libs/common/src/types/dtos/keys.request.dto';
 import { KeysResponse } from '../../../../libs/common/src/types/dtos/keys.response.dto';
 import { KeysService } from '../services/keys.service';
 import { EnqueueService } from '../../../../libs/common/src/services/enqueue-request.service';
@@ -32,7 +32,7 @@ export class KeysController {
    */
   async addKey(@Body() addKeysRequest: KeysRequest): Promise<TransactionResponse> {
     try {
-      const response = await this.enqueueService.enqueueRequest<PublishKeysRequest>({
+      const response = await this.enqueueService.enqueueRequest<AddKeyRequest>({
         ...addKeysRequest,
         type: TransactionType.ADD_KEY,
       });

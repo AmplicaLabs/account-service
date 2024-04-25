@@ -38,7 +38,7 @@ export class AccountsController {
   @ApiOperation({ summary: 'Request to sign in with Frequency' })
   @ApiCreatedResponse({ description: 'Signed in successfully', type: WalletLoginResponse })
   @ApiBody({ type: WalletLoginRequest })
-  async signInWithFrequency(@Body() walletLoginRequest: WalletLoginRequest): Promise<WalletLoginResponse | Response> {
+  async signInWithFrequency(@Body() walletLoginRequest: WalletLoginRequest): Promise<WalletLoginResponse> {
     try {
       this.logger.log(`Received Sign-In With Frequency request: ${JSON.stringify(walletLoginRequest)}`);
       return await this.accountsService.signInWithFrequency(walletLoginRequest);

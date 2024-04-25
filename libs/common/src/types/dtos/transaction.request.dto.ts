@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import { BlockHash, Hash } from '@polkadot/types/interfaces';
 import { PublishHandleRequest } from './handles.request.dto';
 import { PublishSIWFSignupRequest } from './wallet.login.request.dto';
