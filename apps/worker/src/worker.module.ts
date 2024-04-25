@@ -33,10 +33,10 @@ import { TxnNotifierModule } from './transaction_notifier/notifier.module';
               onClientCreated(client) {
                 redisEventsToEventEmitter(client, eventEmitter);
               },
+              readyLog: false,
+              errorLog: false,
             },
           ],
-          readyLog: false,
-          errorLog: false,
         }),
         inject: [ConfigService, EventEmitter2],
       },
@@ -84,5 +84,6 @@ import { TxnNotifierModule } from './transaction_notifier/notifier.module';
     TxnNotifierModule,
   ],
   providers: [ConfigService, TransactionPublisherService, TxnNotifierService, ProviderWebhookService, NonceService],
+  exports: [],
 })
 export class WorkerModule {}
