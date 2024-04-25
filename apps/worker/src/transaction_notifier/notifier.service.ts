@@ -96,7 +96,7 @@ export class TxnNotifierService extends BaseConsumer {
 
                 webhookResponse = {
                   referenceId: job.data.referenceId,
-                  type: job.data.type,
+                  transactionType: job.data.type,
                   msaId,
                   handle,
                   providerId: job.data.providerId,
@@ -133,8 +133,8 @@ export class TxnNotifierService extends BaseConsumer {
                   }
                 });
                 webhookResponse = {
+                  transactionType: 'SIWFSignup',
                   referenceId: job.data.referenceId,
-                  type: TransactionType.SIWF_SIGNUP,
                   accountId: address,
                   msaId,
                   handle,
