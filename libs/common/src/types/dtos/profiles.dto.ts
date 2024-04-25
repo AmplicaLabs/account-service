@@ -1,5 +1,4 @@
 /* eslint-disable max-classes-per-file */
-import { Time } from '@polkadot/util/types';
 import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateProfileRequest {

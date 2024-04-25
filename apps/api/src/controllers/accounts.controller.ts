@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Post, HttpCode, HttpStatus, Logger, Param, HttpException } from '@nestjs/common';
-import { ApiBody, ApiOkResponse, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AccountsService } from '../services/accounts.service';
-import { AccountResponse } from '../../../../libs/common/src/types/dtos/accounts.dto';
-import { WalletLoginResponse } from '../../../../libs/common/src/types/dtos/wallet.login.response.dto';
-import { WalletLoginRequest } from '../../../../libs/common/src/types/dtos/wallet.login.request.dto';
+import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AccountResponse } from '#lib/types/dtos/accounts.dto';
+import { WalletLoginResponse } from '#lib/types/dtos/wallet.login.response.dto';
+import { WalletLoginRequest } from '#lib/types/dtos/wallet.login.request.dto';
+import { AccountsService } from '#api/services/accounts.service';
 
 @Controller('accounts')
 @ApiTags('accounts')

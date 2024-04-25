@@ -1,7 +1,7 @@
+import { BlockchainService } from '#lib/blockchain/blockchain.service';
+import { ConfigService } from '#lib/config/config.service';
+import { DelegationResponse } from '#lib/types/dtos/delegation.dto';
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '../../../../libs/common/src/config/config.service';
-import { BlockchainService } from '../../../../libs/common/src/blockchain/blockchain.service';
-import { DelegationResponse } from '../../../../libs/common/src/types/dtos/delegation.dto';
 
 @Injectable()
 export class DelegationService {

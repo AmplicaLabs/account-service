@@ -1,11 +1,11 @@
 import { Controller, Get, Post, HttpCode, HttpStatus, Logger, Param, HttpException, Body } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { HandleResponse } from '@frequency-chain/api-augment/interfaces';
-import { HandlesService } from '../services/handles.service';
-import { HandleRequest, PublishHandleRequest } from '../../../../libs/common/src/types/dtos/handles.dto';
-import { TransactionType } from '../../../../libs/common/src/types/enums';
-import { EnqueueService } from '../../../../libs/common/src/services/enqueue-request.service';
-import { TransactionResponse } from '../../../../libs/common/src/types/dtos/transaction.dto';
+import { HandleRequest, PublishHandleRequest } from '#lib/types/dtos/handles.dto';
+import { TransactionType } from '#lib/types/enums';
+import { HandlesService } from '#api/services/handles.service';
+import { EnqueueService } from '#lib/services/enqueue-request.service';
+import { TransactionResponse } from 'libs/common/src';
 
 @Controller('handles')
 @ApiTags('handles')
