@@ -1,13 +1,11 @@
-/*
-https://docs.nestjs.com/modules
-*/
 import '@frequency-chain/api-augment';
 
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
-import { BlockchainModule } from '../../../../libs/common/src/blockchain/blockchain.module';
-import { ConfigModule } from '../../../../libs/common/src/config/config.module';
-import { NonceService, QueueConstants } from '../../../../libs/common/src';
+import { BlockchainModule } from '#lib/blockchain/blockchain.module';
+import { NonceService } from '#lib/services/nonce.service';
+import { QueueConstants } from '#lib/utils/queues';
+import { ConfigModule } from '#lib/config/config.module';
 import { TransactionPublisherService } from './publisher.service';
 
 @Module({
