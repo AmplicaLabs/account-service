@@ -119,18 +119,34 @@
     "typescript": "^5.1.3"
   },
   "jest": {
-    "moduleFileExtensions": ["js", "json", "ts"],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
     "rootDir": ".",
-    "setupFiles": ["dotenv/config"],
+    "setupFiles": [
+      "dotenv/config"
+    ],
     "testRegex": ".*\\.spec\\.ts$",
-    "testPathIgnorePatterns": [".*\\.mock\\.spec\\.ts$"],
+    "testPathIgnorePatterns": [
+      ".*\\.mock\\.spec\\.ts$"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "collectCoverageFrom": ["**/*.(t|j)s"],
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/test/"
+    ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
-    "roots": ["<rootDir>/apps/", "<rootDir>/libs/"],
+    "roots": [
+      "<rootDir>/apps/",
+      "<rootDir>/libs/"
+    ],
     "moduleNameMapper": {
       "^#api(|/.*)$": "<rootDir>/apps/api/src/$1",
       "^#worker(|/.*)$": "<rootDir>/apps/worker/src/$1",
