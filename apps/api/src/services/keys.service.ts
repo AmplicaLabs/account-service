@@ -1,5 +1,5 @@
 import { BlockchainService } from '#lib/blockchain/blockchain.service';
-import { KeysResponse } from '#lib/types/dtos/keys.dto';
+import { KeysResponse } from '#lib/types/dtos/keys.response.dto';
 import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()

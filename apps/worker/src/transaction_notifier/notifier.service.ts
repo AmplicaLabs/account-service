@@ -1,7 +1,7 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
-import { InjectQueue, Processor } from '@nestjs/bullmq';
+import { Processor } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
-import { Job, Queue } from 'bullmq';
+import { Job } from 'bullmq';
 import Redis from 'ioredis';
 import { MILLISECONDS_PER_SECOND } from 'time-constants';
 import { IEventData, RegistryError } from '@polkadot/types/types';
@@ -11,7 +11,7 @@ import { BlockchainService } from '#lib/blockchain/blockchain.service';
 import { TransactionType } from '#lib/types/enums';
 import { QueueConstants } from '#lib/utils/queues';
 import { BaseConsumer } from '#worker/BaseConsumer';
-import { TxMonitorJob, TransactionNotification, SECONDS_PER_BLOCK } from 'libs/common/src';
+import { TxMonitorJob, SECONDS_PER_BLOCK } from 'libs/common/src';
 import { ConfigService } from '#lib/config/config.service';
 
 @Injectable()

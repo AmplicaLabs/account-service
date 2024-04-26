@@ -1,11 +1,11 @@
 import { Controller, Get, Post, HttpCode, HttpStatus, Logger, Param, HttpException, Body } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { HandleResponse } from '@frequency-chain/api-augment/interfaces';
-import { HandleRequest, PublishHandleRequest } from '#lib/types/dtos/handles.dto';
 import { TransactionType } from '#lib/types/enums';
 import { HandlesService } from '#api/services/handles.service';
 import { EnqueueService } from '#lib/services/enqueue-request.service';
-import { TransactionResponse } from 'libs/common/src';
+import { ChangeHandleRequest, CreateHandleRequest, HandleRequest } from '#lib/types/dtos/handles.request.dto';
+import { TransactionResponse } from '#lib/types/dtos/transaction.response.dto';
 
 @Controller('handles')
 @ApiTags('handles')
@@ -32,7 +32,7 @@ export class HandlesController {
    */
   async createHandle(@Body() createHandleRequest: HandleRequest): Promise<TransactionResponse> {
     try {
-      const response = await this.enqueueService.enqueueRequest<PublishHandleRequest>({
+      const response = await this.enqueueService.enqueueRequest<CreateHandleRequest>({
         ...createHandleRequest,
         type: TransactionType.CREATE_HANDLE,
       });
@@ -57,7 +57,7 @@ export class HandlesController {
    */
   async changeHandle(@Body() changeHandleRequest: HandleRequest): Promise<TransactionResponse> {
     try {
-      const response = await this.enqueueService.enqueueRequest<PublishHandleRequest>({
+      const response = await this.enqueueService.enqueueRequest<ChangeHandleRequest>({
         ...changeHandleRequest,
         type: TransactionType.CHANGE_HANDLE,
       });

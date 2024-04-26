@@ -16,14 +16,14 @@ import {
   PalletCapacityEpochInfo,
   PalletSchemasSchemaInfo,
 } from '@polkadot/types/lookup';
-import { KeyInfoResponse } from '@frequency-chain/api-augment/interfaces';
-import { PublishHandleRequest, Handle } from '#lib/types/dtos/handles.dto';
+import { HandleResponse, KeyInfoResponse } from '@frequency-chain/api-augment/interfaces';
 import { ConfigService } from '#lib/config/config.service';
-import { TransactionData } from '#lib/types/dtos/transaction.dto';
 import { TransactionType } from '#lib/types/enums';
 import { HexString } from '@polkadot/util/types';
-import { AddKeysRequest } from '#lib/types/dtos/keys.dto';
 import { decodeAddress } from '@polkadot/util-crypto';
+import { KeysRequest } from '#lib/types/dtos/keys.request.dto';
+import { PublishHandleRequest } from '#lib/types/dtos/handles.request.dto';
+import { TransactionData } from '#lib/types/dtos/transaction.request.dto';
 import { Extrinsic } from './extrinsic';
 
 export type Sr25519Signature = { Sr25519: HexString };
@@ -172,7 +172,7 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     return (await firstValueFrom(keyInfoResponse)).unwrap();
   }
 
-  public async addPublicKeyToMsa(keysRequest: AddKeysRequest): Promise<SubmittableExtrinsic<any>> {
+  public async addPublicKeyToMsa(keysRequest: KeysRequest): Promise<SubmittableExtrinsic<any>> {
     const { msaOwnerAddress, msaOwnerSignature, newKeyOwnerSignature, payload } = keysRequest;
     const msaIdU64 = this.api.createType('u64', payload.msaId);
 
@@ -217,7 +217,7 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
     }
   }
 
-  public async getHandleForMsa(msaId: number): Promise<Handle | null> {
+  public async getHandleForMsa(msaId: number): Promise<HandleResponse | null> {
     const handleResponse = await this.rpc('handles', 'getHandleForMsa', msaId);
     if (handleResponse.isSome) return handleResponse.unwrap();
     return null;

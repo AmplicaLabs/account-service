@@ -3,13 +3,13 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { validateSignin, validateSignup } from '@amplica-labs/siwf';
 import { BlockchainService } from '#lib/blockchain/blockchain.service';
-import { AccountResponse } from '#lib/types/dtos/accounts.dto';
 import { TransactionType } from '#lib/types/enums';
 import { QueueConstants } from '#lib/utils/queues';
 import { ConfigService } from '#lib/config/config.service';
 import { EnqueueService } from '#lib/services/enqueue-request.service';
 import { WalletLoginRequest, PublishSIWFSignupRequest } from '#lib/types/dtos/wallet.login.request.dto';
 import { WalletLoginResponse } from '#lib/types/dtos/wallet.login.response.dto';
+import { AccountResponse } from '#lib/types/dtos/accounts.response.dto';
 
 @Injectable()
 export class AccountsService {
