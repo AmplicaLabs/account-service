@@ -45,7 +45,7 @@
     "@amplica-labs/siwf": "1.1.0",
     "@bull-board/api": "^5.8.3",
     "@bull-board/express": "^5.8.3",
-    "@bull-board/nestjs": "^5.8.3",
+    "@bull-board/nestjs": "^5.16.0",
     "@bull-board/ui": "^5.8.3",
     "@frequency-chain/api-augment": "^1.11.1",
     "@jest/globals": "^29.5.0",
