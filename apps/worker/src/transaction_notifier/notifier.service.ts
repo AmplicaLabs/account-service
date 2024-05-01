@@ -36,6 +36,13 @@ export class TxnNotifierService extends BaseConsumer {
     super();
   }
 
+  /**
+   * Processes a job for transaction notification.
+   *
+   * @param job - Search the finalized blocks for the transaction hash in TxMonitorJob.
+   * @returns A promise that resolves to the result of the processing.
+   * @throws If there is an error during the processing.
+   */
   async process(job: Job<TxMonitorJob, any, string>): Promise<any> {
     this.logger.log(`Processing job ${job.id} of type ${job.name}`);
     try {
@@ -89,7 +96,7 @@ export class TxnNotifierService extends BaseConsumer {
               } else {
                 const { debugMsg, msaId, handle } = handlePublishHandleTxResult(txResult.events);
 
-                webhookResponse = createWebhookRsp<PublishHandleWebhookRsp>(job, msaId, { handle });
+                webhookResponse = createWebhookRsp(job, msaId, { handle });
 
                 this.logger.debug(debugMsg);
                 this.logger.debug(
@@ -103,9 +110,9 @@ export class TxnNotifierService extends BaseConsumer {
               } else {
                 const { address, newProvider, debugMsg, msaId, handle } = handleSIWFTxResult(txResult.events);
 
-                webhookResponse = createWebhookRsp<SIWFWebhookRsp>(job, msaId, {
+                webhookResponse = createWebhookRsp(job, msaId, {
                   accountId: address,
-                  providerId: parseInt(newProvider, 10),
+                  providerId: newProvider,
                   handle,
                 });
 
@@ -121,7 +128,7 @@ export class TxnNotifierService extends BaseConsumer {
               } else {
                 const { debugMsg, msaId, newPublicKey } = handlePublishKeyTxResult(txResult.events);
 
-                webhookResponse = createWebhookRsp<PublishKeysWebhookRsp>(job, msaId, { newPublicKey });
+                webhookResponse = createWebhookRsp(job, msaId, { newPublicKey });
 
                 this.logger.debug(debugMsg);
                 this.logger.debug(
