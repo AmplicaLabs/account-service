@@ -2,7 +2,6 @@ import { BlockHash, Hash } from '@polkadot/types/interfaces';
 import { PublishHandleRequest } from './handles.request.dto';
 import { PublishSIWFSignupRequest } from './wallet.login.request.dto';
 import { PublishKeysRequest } from './keys.request.dto';
-import { TransactionType } from '../enums';
 
 export type TransactionData<RequestType = PublishHandleRequest | PublishSIWFSignupRequest | PublishKeysRequest> =
   RequestType & {
@@ -17,12 +16,10 @@ export type TxMonitorJob = TransactionData & {
   lastFinalizedBlockHash: BlockHash;
 };
 
-type TxWebhookRspBase = {
-  transactionType: TransactionType;
+export type TxWebhookRspBase = {
   providerId: TransactionData['providerId'];
   referenceId: TransactionData['referenceId'];
   msaId: string;
-  [key: string]: any; // for the properties in 'options'
 };
 
 export type PublishHandleOpts = { handle: string };
@@ -30,7 +27,13 @@ export type SIWFOpts = { handle: string; accountId: string; providerId: Transact
 export type PublishKeysOpts = { newPublicKey: string };
 export type TxWebhookOpts = PublishHandleOpts | SIWFOpts | PublishKeysOpts;
 
-export type PublishHandleWebhookRsp = TxWebhookRspBase & PublishHandleOpts;
-export type SIWFWebhookRsp = TxWebhookRspBase & SIWFOpts;
-export type PublishKeysWebhookRsp = TxWebhookRspBase & PublishKeysOpts;
+export interface PublishHandleWebhookRsp extends TxWebhookRspBase, PublishHandleOpts {
+  transactionType: PublishHandleRequest['type'];
+}
+export interface SIWFWebhookRsp extends TxWebhookRspBase, SIWFOpts {
+  transactionType: PublishSIWFSignupRequest['type'];
+}
+export interface PublishKeysWebhookRsp extends TxWebhookRspBase, PublishKeysOpts {
+  transactionType: PublishKeysRequest['type'];
+}
 export type TxWebhookRsp = PublishHandleWebhookRsp | SIWFWebhookRsp | PublishKeysWebhookRsp;
