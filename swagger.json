@@ -10,15 +10,6 @@
         "tags": ["api"]
       }
     },
-    "/accounts/{msaId}": {
-      "get": {
-        "operationId": "AccountsController_getAccount",
-        "summary": "Fetch an account given an msaId.",
-        "parameters": [{ "name": "msaId", "required": true, "in": "path", "schema": { "type": "number" } }],
-        "responses": { "200": { "description": "Found account" } },
-        "tags": ["accounts"]
-      }
-    },
     "/accounts/siwf": {
       "get": {
         "operationId": "AccountsController_getSIWFConfig",
@@ -48,6 +39,15 @@
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WalletLoginResponse" } } }
           }
         },
+        "tags": ["accounts"]
+      }
+    },
+    "/accounts/{msaId}": {
+      "get": {
+        "operationId": "AccountsController_getAccount",
+        "summary": "Fetch an account given an msaId.",
+        "parameters": [{ "name": "msaId", "required": true, "in": "path", "schema": { "type": "number" } }],
+        "responses": { "200": { "description": "Found account" } },
         "tags": ["accounts"]
       }
     },

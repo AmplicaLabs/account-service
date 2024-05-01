@@ -15,6 +15,20 @@ export class AccountsController {
     this.logger = new Logger(this.constructor.name);
   }
 
+  @Get('siwf')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get the Sign-In With Frequency Configuration' })
+  @ApiOkResponse({ description: 'Returned SIWF Configuration data', type: WalletLoginConfigResponse })
+  async getSIWFConfig(): Promise<WalletLoginConfigResponse> {
+    try {
+      return await this.accountsService.getSIWFConfig();
+    } catch (error) {
+      const errorMessage = 'Failed to get the Sign-In With Frequency Configuration';
+      this.logger.error(`${errorMessage}: ${error}`);
+      throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
+    }
+  }
+
   @Get(':msaId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Fetch an account given an msaId.' })
@@ -31,20 +45,6 @@ export class AccountsController {
     } catch (error) {
       this.logger.error(error);
       throw new HttpException('Failed to find the account', HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  @Get('siwf')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get the Sign-In With Frequency Configuration' })
-  @ApiOkResponse({ description: 'Returned SIWF Configuration data', type: WalletLoginConfigResponse })
-  async getSIWFConfig(): Promise<WalletLoginConfigResponse> {
-    try {
-      return await this.accountsService.getSIWFConfig();
-    } catch (error) {
-      const errorMessage = 'Failed to get the Sign-In With Frequency Configuration';
-      this.logger.error(`${errorMessage}: ${error}`);
-      throw new HttpException(errorMessage, HttpStatus.BAD_REQUEST);
     }
   }
 
