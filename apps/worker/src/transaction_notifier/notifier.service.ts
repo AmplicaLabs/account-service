@@ -11,8 +11,19 @@ import { BlockchainService } from '#lib/blockchain/blockchain.service';
 import { TransactionType } from '#lib/types/enums';
 import { QueueConstants } from '#lib/utils/queues';
 import { BaseConsumer } from '#worker/BaseConsumer';
-import { TxMonitorJob, SECONDS_PER_BLOCK } from 'libs/common/src';
+import {
+  TxMonitorJob,
+  SECONDS_PER_BLOCK,
+  TxWebhookRsp,
+  PublishHandleWebhookRsp,
+  SIWFWebhookRsp,
+  PublishKeysWebhookRsp,
+} from 'libs/common/src';
 import { ConfigService } from '#lib/config/config.service';
+import { handleSIWFTxResult } from '#worker/transaction_notifier/notifier.service.helper.siwf';
+import { handlePublishKeyTxResult } from '#worker/transaction_notifier/notifier.service.helper.publishKey';
+import { createWebhookRsp } from '#worker/transaction_notifier/notifier.service.helper.createWebhookRsp';
+import { handlePublishHandleTxResult } from '#worker/transaction_notifier/notifier.service.helper.publishHandle';
 
 @Injectable()
 @Processor(QueueConstants.TRANSACTION_NOTIFY_QUEUE)
@@ -67,12 +78,7 @@ export class TxnNotifierService extends BaseConsumer {
         if (txResult.success) {
           this.logger.verbose(`Successfully found ${job.data.txHash} found in block ${txResult.blockHash}`);
           const webhook = await this.getWebhook();
-          let webhookResponse;
-          let msaId: string = '';
-          let address = '';
-          let handle: string = '';
-          let newProvider: string = '';
-          let newPublicKey: string = '';
+          let webhookResponse: TxWebhookRsp | null = null;
 
           const jobType: TxMonitorJob['type'] = job.data.type;
           switch (jobType) {
@@ -81,71 +87,29 @@ export class TxnNotifierService extends BaseConsumer {
               if (!txResult.events) {
                 this.logger.error('No Handle events found in tx result');
               } else {
-                txResult.events.forEach((record) => {
-                  const { event } = record;
-                  const eventName = event.section;
-                  const { method, data } = event;
-                  // Grab the handle and msa id from the event data
-                  if (eventName.search('handles') !== -1 && method.search('HandleClaimed') !== -1) {
-                    data as IEventData;
-                    msaId = data[0].toString();
-                    // Remove the 0x prefix from the handle
-                    const handleData = data[1].toString().slice(2);
-                    // Convert the hex handle to a utf-8 string
-                    handle = Buffer.from(handleData.toString(), 'hex').toString('utf-8');
-                    this.logger.debug(`Handle created: ${handle} for msaId: ${msaId}`);
-                  }
-                });
+                const { debugMsg, msaId, handle } = handlePublishHandleTxResult(txResult.events);
 
-                webhookResponse = {
-                  transactionType: job.data.type,
-                  referenceId: job.data.referenceId,
-                  msaId,
-                  handle,
-                  providerId: job.data.providerId,
-                };
+                webhookResponse = createWebhookRsp<PublishHandleWebhookRsp>(job, msaId, { handle });
+
+                this.logger.debug(debugMsg);
+                this.logger.debug(
+                  `Handles ${webhookResponse.transactionType} finalized ${webhookResponse.handle} for msaId ${webhookResponse.msaId}.`,
+                );
               }
-              this.logger.debug(
-                `Handles ${webhookResponse.type} finalized ${webhookResponse.handle} for msaId ${webhookResponse.msaId}.`,
-              );
               break;
             case TransactionType.SIWF_SIGNUP:
               if (!txResult.events) {
                 this.logger.error('No SIWF events found in tx result');
               } else {
-                txResult.events.forEach((record) => {
-                  const { event } = record;
-                  const eventName = event.section;
-                  const { method, data } = event;
-                  if (eventName.search('msa') !== -1 && method.search('MsaCreated') !== -1) {
-                    data as IEventData;
-                    msaId = data[0].toString();
-                    address = data[1].toString();
-                    this.logger.debug(`SIWF MSA created: ${msaId} for address: ${address}`);
-                  }
-                  if (eventName.search('handles') !== -1 && method.search('HandleClaimed') !== -1) {
-                    data as IEventData;
-                    // Remove the 0x prefix from the handle
-                    const handleData = data[1].toString().slice(2);
-                    // Convert the hex handle to a utf-8 string
-                    handle = Buffer.from(handleData.toString(), 'hex').toString('utf-8');
-                    this.logger.debug(`SIWF Handle created: ${handle} for msaId: ${msaId}`);
-                  }
-                  if (eventName.search('msa') !== -1 && method.search('DelegationGranted') !== -1) {
-                    data as IEventData;
-                    newProvider = data[0].toString();
-                    const owner = data[1].toString();
-                    this.logger.debug(`SIWF Delegation granted: ${owner} to ${newProvider}`);
-                  }
-                });
-                webhookResponse = {
-                  transactionType: job.data.type,
-                  referenceId: job.data.referenceId,
+                const { address, newProvider, debugMsg, msaId, handle } = handleSIWFTxResult(txResult.events);
+
+                webhookResponse = createWebhookRsp<SIWFWebhookRsp>(job, msaId, {
                   accountId: address,
-                  msaId,
+                  providerId: parseInt(newProvider, 10),
                   handle,
-                  providerId: newProvider,
-                };
+                });
+
+                this.logger.debug(debugMsg);
                 this.logger.debug(
                   `SIWF ${address} Signed up handle ${webhookResponse.handle} for msaId ${webhookResponse.msaId}`,
                 );
@@ -155,30 +119,15 @@ export class TxnNotifierService extends BaseConsumer {
               if (!txResult.events) {
                 this.logger.error('No ADD KEY events found in tx result');
               } else {
-                txResult.events.forEach((record) => {
-                  const { event } = record;
-                  const eventName = event.section;
-                  const { method, data } = event;
-                  // Grab the event data
-                  if (eventName.search('msa') !== -1 && method.search('PublicKeyAdded') !== -1) {
-                    data as IEventData;
-                    msaId = data[0].toString();
-                    newPublicKey = data[1].toString();
-                    this.logger.debug(`Public Key: ${newPublicKey} Added for msaId: ${msaId}`);
-                  }
-                });
+                const { debugMsg, msaId, newPublicKey } = handlePublishKeyTxResult(txResult.events);
 
-                webhookResponse = {
-                  transactionType: job.data.type,
-                  referenceId: job.data.referenceId,
-                  msaId,
-                  newPublicKey,
-                  providerId: job.data.providerId,
-                };
+                webhookResponse = createWebhookRsp<PublishKeysWebhookRsp>(job, msaId, { newPublicKey });
+
+                this.logger.debug(debugMsg);
+                this.logger.debug(
+                  `Keys ${webhookResponse.transactionType} added the key ${webhookResponse.newPublicKey} for msaId ${webhookResponse.msaId}.`,
+                );
               }
-              this.logger.debug(
-                `Handles ${webhookResponse.type} finalized ${webhookResponse.handle} for msaId ${webhookResponse.msaId}.`,
-              );
               break;
             default:
               this.logger.error(`Unknown transaction type on job.data: ${jobType}`);
