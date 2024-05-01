@@ -108,11 +108,10 @@ export class TxnNotifierService extends BaseConsumer {
               if (!txResult.events) {
                 this.logger.error('No SIWF events found in tx result');
               } else {
-                const { address, newProvider, debugMsg, msaId, handle } = handleSIWFTxResult(txResult.events);
+                const { address, debugMsg, msaId, handle } = handleSIWFTxResult(txResult.events);
 
                 webhookResponse = createWebhookRsp(job, msaId, {
                   accountId: address,
-                  providerId: newProvider,
                   handle,
                 });
 

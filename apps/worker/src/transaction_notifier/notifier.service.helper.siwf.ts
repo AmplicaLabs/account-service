@@ -6,7 +6,6 @@ interface ReturnValue {
   msaId: string;
   address: string;
   handle: string;
-  newProvider: string;
   debugMsg: string;
 }
 
@@ -14,7 +13,6 @@ export const handleSIWFTxResult = (txResultEvents: Vec<EventRecord>): ReturnValu
   let msaId;
   let address;
   let handle;
-  let newProvider;
   let debugMsg;
 
   txResultEvents.forEach((record) => {
@@ -32,10 +30,10 @@ export const handleSIWFTxResult = (txResultEvents: Vec<EventRecord>): ReturnValu
       debugMsg = `SIWF Handle created: ${handle} for msaId: ${msaId}`;
     }
     if (section.search('msa') !== -1 && method.search('DelegationGranted') !== -1) {
-      newProvider = data[0].toString();
+      const newProvider = data[0].toString();
       const owner = data[1].toString();
       debugMsg = `SIWF Delegation granted: ${owner} to ${newProvider}`;
     }
   });
-  return { msaId, address, handle, newProvider, debugMsg };
+  return { msaId, address, handle, debugMsg };
 };
