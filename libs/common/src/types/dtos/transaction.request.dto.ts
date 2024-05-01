@@ -23,7 +23,7 @@ export type TxWebhookRspBase = {
 };
 
 export type PublishHandleOpts = { handle: string };
-export type SIWFOpts = { handle: string; accountId: string; providerId: TransactionData['providerId'] };
+export type SIWFOpts = { handle: string; accountId: string };
 export type PublishKeysOpts = { newPublicKey: string };
 export type TxWebhookOpts = PublishHandleOpts | SIWFOpts | PublishKeysOpts;
 
