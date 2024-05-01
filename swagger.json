@@ -20,6 +20,20 @@
       }
     },
     "/accounts/siwf": {
+      "get": {
+        "operationId": "AccountsController_getSIWFConfig",
+        "summary": "Get the Sign-In With Frequency Configuration",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returned SIWF Configuration data",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/WalletLoginConfigResponse" } }
+            }
+          }
+        },
+        "tags": ["accounts"]
+      },
       "post": {
         "operationId": "AccountsController_signInWithFrequency",
         "summary": "Request to sign in with Frequency",
@@ -113,6 +127,17 @@
       "cookie": { "type": "apiKey", "in": "cookie", "name": "SESSION" }
     },
     "schemas": {
+      "WalletLoginConfigResponse": {
+        "type": "object",
+        "properties": {
+          "providerId": { "type": "string" },
+          "proxyUrl": { "type": "string" },
+          "frequencyRpcUrl": { "type": "string" },
+          "schemas": { "type": "array", "items": { "type": "string" } },
+          "siwsOptions": { "type": "object" }
+        },
+        "required": ["providerId", "proxyUrl", "frequencyRpcUrl", "schemas", "siwsOptions"]
+      },
       "WalletLoginRequest": {
         "type": "object",
         "properties": {
