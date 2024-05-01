@@ -85,7 +85,7 @@ import { TransactionPublisherService } from './transaction_publisher/publisher.s
       {
         name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
         defaultJobOptions: {
-          removeOnComplete: true,
+          removeOnComplete: 20,
           removeOnFail: false,
           attempts: 1,
         },
@@ -93,7 +93,7 @@ import { TransactionPublisherService } from './transaction_publisher/publisher.s
       {
         name: QueueConstants.TRANSACTION_NOTIFY_QUEUE,
         defaultJobOptions: {
-          removeOnComplete: true,
+          removeOnComplete: 20,
           removeOnFail: false,
           attempts: 3,
         },

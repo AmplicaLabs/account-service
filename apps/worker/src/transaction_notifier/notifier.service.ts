@@ -72,6 +72,7 @@ export class TxnNotifierService extends BaseConsumer {
           let address = '';
           let handle: string = '';
           let newProvider: string = '';
+          let newPublicKey: string = '';
 
           const jobType: TxMonitorJob['type'] = job.data.type;
           switch (jobType) {
@@ -88,7 +89,10 @@ export class TxnNotifierService extends BaseConsumer {
                   if (eventName.search('handles') !== -1 && method.search('HandleClaimed') !== -1) {
                     data as IEventData;
                     msaId = data[0].toString();
-                    handle = Buffer.from(data[1].toString(), 'hex').toString('utf-8');
+                    // Remove the 0x prefix from the handle
+                    const handleData = data[1].toString().slice(2);
+                    // Convert the hex handle to a utf-8 string
+                    handle = Buffer.from(handleData.toString(), 'hex').toString('utf-8');
                     this.logger.debug(`Handle created: ${handle} for msaId: ${msaId}`);
                   }
                 });
@@ -121,7 +125,10 @@ export class TxnNotifierService extends BaseConsumer {
                   }
                   if (eventName.search('handles') !== -1 && method.search('HandleClaimed') !== -1) {
                     data as IEventData;
-                    handle = data[1].toString();
+                    // Remove the 0x prefix from the handle
+                    const handleData = data[1].toString().slice(2);
+                    // Convert the hex handle to a utf-8 string
+                    handle = Buffer.from(handleData.toString(), 'hex').toString('utf-8');
                     this.logger.debug(`SIWF Handle created: ${handle} for msaId: ${msaId}`);
                   }
                   if (eventName.search('msa') !== -1 && method.search('DelegationGranted') !== -1) {
@@ -156,8 +163,8 @@ export class TxnNotifierService extends BaseConsumer {
                   if (eventName.search('msa') !== -1 && method.search('PublicKeyAdded') !== -1) {
                     data as IEventData;
                     msaId = data[0].toString();
-                    handle = Buffer.from(data[1].toString(), 'hex').toString('utf-8');
-                    this.logger.debug(`Public Key Added for msaId: ${msaId}`);
+                    newPublicKey = data[1].toString();
+                    this.logger.debug(`Public Key: ${newPublicKey} Added for msaId: ${msaId}`);
                   }
                 });
 
@@ -165,7 +172,7 @@ export class TxnNotifierService extends BaseConsumer {
                   transactionType: job.data.type,
                   referenceId: job.data.referenceId,
                   msaId,
-                  handle,
+                  newPublicKey,
                   providerId: job.data.providerId,
                 };
               }
