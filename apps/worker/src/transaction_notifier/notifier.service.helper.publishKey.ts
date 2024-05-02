@@ -1,4 +1,5 @@
 import { Vec } from '@polkadot/types';
+import { IEventData } from '@polkadot/types/types';
 import { EventRecord } from '@polkadot/types/interfaces';
 
 interface ReturnValue {
@@ -13,7 +14,7 @@ export const handlePublishKeyTxResult = (txResultEvents: Vec<EventRecord>): Retu
   let debugMsg;
 
   txResultEvents.forEach((record) => {
-    const { method, data, section } = record.event;
+    const { method, data, section }: { method: string; data: IEventData; section: string } = record.event;
     // Grab the event data
     if (section.search('msa') !== -1 && method.search('PublicKeyAdded') !== -1) {
       msaId = data[0].toString();

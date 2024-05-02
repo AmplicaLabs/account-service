@@ -99,8 +99,8 @@ export class TxnNotifierService extends BaseConsumer {
                 webhookResponse = createWebhookRsp(job, msaId, { handle });
 
                 this.logger.debug(debugMsg);
-                this.logger.debug(
-                  `Handles ${webhookResponse.transactionType} finalized ${webhookResponse.handle} for msaId ${webhookResponse.msaId}.`,
+                this.logger.log(
+                  `Handles: ${webhookResponse.transactionType} finalized handle ${webhookResponse.handle} for msaId ${webhookResponse.msaId}.`,
                 );
               }
               break;
@@ -108,16 +108,15 @@ export class TxnNotifierService extends BaseConsumer {
               if (!txResult.events) {
                 this.logger.error('No SIWF events found in tx result');
               } else {
-                const { address, debugMsg, msaId, handle } = handleSIWFTxResult(txResult.events);
+                const { address, msaId, handle, newProvider } = handleSIWFTxResult(txResult.events);
 
                 webhookResponse = createWebhookRsp(job, msaId, {
                   accountId: address,
                   handle,
                 });
 
-                this.logger.debug(debugMsg);
-                this.logger.debug(
-                  `SIWF ${address} Signed up handle ${webhookResponse.handle} for msaId ${webhookResponse.msaId}`,
+                this.logger.log(
+                  `SIWF: ${address} Signed up handle ${webhookResponse.handle} for msaId ${webhookResponse.msaId} delegated to provider ${newProvider}.`,
                 );
               }
               break;
@@ -130,8 +129,8 @@ export class TxnNotifierService extends BaseConsumer {
                 webhookResponse = createWebhookRsp(job, msaId, { newPublicKey });
 
                 this.logger.debug(debugMsg);
-                this.logger.debug(
-                  `Keys ${webhookResponse.transactionType} added the key ${webhookResponse.newPublicKey} for msaId ${webhookResponse.msaId}.`,
+                this.logger.log(
+                  `Keys: Added the key ${webhookResponse.newPublicKey} for msaId ${webhookResponse.msaId}.`,
                 );
               }
               break;

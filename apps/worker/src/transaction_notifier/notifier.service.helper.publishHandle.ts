@@ -1,4 +1,5 @@
 import { Vec } from '@polkadot/types';
+import { IEventData } from '@polkadot/types/types';
 import { EventRecord } from '@polkadot/types/interfaces';
 
 interface ReturnValue {
@@ -13,7 +14,7 @@ export const handlePublishHandleTxResult = (txResultEvents: Vec<EventRecord>): R
   let debugMsg;
 
   txResultEvents.forEach((record) => {
-    const { method, data, section } = record.event;
+    const { method, data, section }: { method: string; data: IEventData; section: string } = record.event;
     // Grab the handle and msa id from the event data
     if (section.search('handles') !== -1 && method.search('HandleClaimed') !== -1) {
       msaId = data[0].toString();
