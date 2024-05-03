@@ -21,7 +21,7 @@ export class AccountsController {
   @ApiOkResponse({ description: 'Returned SIWF Configuration data', type: WalletLoginConfigResponse })
   async getSIWFConfig(): Promise<WalletLoginConfigResponse> {
     try {
-      return await this.accountsService.getSIWFConfig();
+      return this.accountsService.getSIWFConfig();
     } catch (error) {
       const errorMessage = 'Failed to get the Sign-In With Frequency Configuration';
       this.logger.error(`${errorMessage}: ${error}`);
