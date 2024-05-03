@@ -1,6 +1,5 @@
-import { RequestedSchema, SiwsOptions } from '@amplica-labs/siwf';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 
 export class WalletLoginConfigResponse {
   @ApiProperty()
@@ -9,17 +8,9 @@ export class WalletLoginConfigResponse {
 
   @ApiProperty()
   @IsNotEmpty()
-  proxyUrl: string;
+  siwfUrl: string;
 
   @ApiProperty()
   @IsNotEmpty()
   frequencyRpcUrl: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  schemas: RequestedSchema[];
-
-  @ApiProperty()
-  @IsOptional()
-  siwsOptions?: SiwsOptions;
 }

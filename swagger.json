@@ -131,12 +131,10 @@
         "type": "object",
         "properties": {
           "providerId": { "type": "string" },
-          "proxyUrl": { "type": "string" },
-          "frequencyRpcUrl": { "type": "string" },
-          "schemas": { "type": "array", "items": { "type": "string" } },
-          "siwsOptions": { "type": "object" }
+          "siwfUrl": { "type": "string" },
+          "frequencyRpcUrl": { "type": "string" }
         },
-        "required": ["providerId", "proxyUrl", "frequencyRpcUrl", "schemas", "siwsOptions"]
+        "required": ["providerId", "siwfUrl", "frequencyRpcUrl"]
       },
       "WalletLoginRequest": {
         "type": "object",
