@@ -432,15 +432,12 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
       if (record.event && this.api.events.msa.MsaCreated.is(record.event)) {
         siwfTxnValues.msaId = record.event.data.msaId.toString();
         siwfTxnValues.address = record.event.data.key.toString();
-      }
-      if (record.event && this.api.events.handles.HandleClaimed.is(record.event)) {
+      } else if (record.event && this.api.events.handles.HandleClaimed.is(record.event)) {
         const handleHex = record.event.data.handle.toString();
         // Remove the 0x prefix from the handle and convert the hex handle to a utf-8 string
         const handleData = handleHex.slice(2);
         siwfTxnValues.handle = Buffer.from(handleData.toString(), 'hex').toString('utf-8');
-      }
-
-      if (record.event && this.api.events.msa.DelegationGranted.is(record.event)) {
+      } else if (record.event && this.api.events.msa.DelegationGranted.is(record.event)) {
         siwfTxnValues.newProvider = record.event.data.providerId.toString();
         const owner = record.event.data.delegatorId.toString();
         if (owner !== siwfTxnValues.msaId) {
