@@ -32,7 +32,7 @@ export class AccountsController {
   @Get(':msaId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Fetch an account given an msaId.' })
-  @ApiOkResponse({ description: 'Found account' })
+  @ApiOkResponse({ description: 'Found account', type: AccountResponse })
   /**
    * Gets an account.
    * @param queryParams - The query parameters for creating the account.

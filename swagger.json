@@ -84,7 +84,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Found account"
+            "description": "Found account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountResponse"
+                }
+              }
+            }
           }
         },
         "tags": [
@@ -280,6 +287,21 @@
           "providerId",
           "siwfUrl",
           "frequencyRpcUrl"
+        ]
+      },
+      "AccountResponse": {
+        "type": "object",
+        "properties": {
+          "msaId": {
+            "type": "number"
+          },
+          "handle": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "msaId"
         ]
       },
       "SiwsPayloadDto": {
