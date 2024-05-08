@@ -38,7 +38,7 @@
         ]
       },
       "post": {
-        "operationId": "AccountsController_signInWithFrequency",
+        "operationId": "AccountsController_postSignInWithFrequency",
         "summary": "Request to sign in with Frequency",
         "parameters": [],
         "requestBody": {
