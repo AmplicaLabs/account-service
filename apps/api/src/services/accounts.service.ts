@@ -27,12 +27,22 @@ export class AccountsService {
   }
 
   async getAccount(msaId: number): Promise<AccountResponse> {
-    const isValidMsaId = await this.blockchainService.isValidMsaId(msaId);
-    if (isValidMsaId) {
-      const handle = await this.blockchainService.getHandleForMsa(msaId);
-      return { msaId, handle };
+    try {
+      let errorMessage = `Invalid msaId: ${msaId}`;
+      const isValidMsaId = await this.blockchainService.isValidMsaId(msaId);
+      if (isValidMsaId) {
+        const handleResponse = await this.blockchainService.getHandleForMsa(msaId);
+        if (handleResponse) {
+          this.logger.debug(`Found handle: ${handleResponse.base_handle.toString()} for msaId: ${msaId}`);
+          return { msaId, displayHandle: handleResponse.base_handle.toString() };
+        }
+        errorMessage = `Failed to get handle for msaId: ${msaId}`;
+      }
+      throw new Error(errorMessage);
+    } catch (e) {
+      this.logger.error(`Error during get account request: ${e}`);
+      throw new Error('Failed to get account');
     }
-    throw new Error('Invalid msaId.');
   }
 
   async getSIWFConfig(): Promise<WalletLoginConfigResponse> {

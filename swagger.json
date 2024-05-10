@@ -295,9 +295,8 @@
           "msaId": {
             "type": "number"
           },
-          "handle": {
-            "type": "object",
-            "nullable": true
+          "displayHandle": {
+            "type": "string"
           }
         },
         "required": [
