@@ -28,7 +28,6 @@ export class AccountsService {
 
   async getAccount(msaId: number): Promise<AccountResponse> {
     try {
-      let errorMessage = `Invalid msaId: ${msaId}`;
       const isValidMsaId = await this.blockchainService.isValidMsaId(msaId);
       if (isValidMsaId) {
         const handleResponse = await this.blockchainService.getHandleForMsa(msaId);
@@ -36,9 +35,10 @@ export class AccountsService {
           this.logger.debug(`Found handle: ${handleResponse.base_handle.toString()} for msaId: ${msaId}`);
           return { msaId, displayHandle: handleResponse.base_handle.toString() };
         }
-        errorMessage = `Failed to get handle for msaId: ${msaId}`;
+        this.logger.log(`Failed to get handle for msaId: ${msaId}`);
+        return { msaId };
       }
-      throw new Error(errorMessage);
+      throw new Error(`Invalid msaId: ${msaId}`);
     } catch (e) {
       this.logger.error(`Error during get account request: ${e}`);
       throw new Error('Failed to get account');
