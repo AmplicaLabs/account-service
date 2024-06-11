@@ -4,20 +4,27 @@
 
 # 📗 Table of Contents
 
-- [📖 About the Project](#about-project)
+- [📖 About the Project](#-account-service-a-nameabout-projecta)
 - [🔍 Arch Map](#-arch-maps)
-- [🛠 Built With](#-built-with)
-    - [Tech Stack](#tech-stack)
-    - [Key Features](#key-features)
+- [🛠 Built With](#-built-with-a-namebuilt-witha)
+  - [Tech Stack](#tech-stack-a-nametech-stacka)
+  - [Key Features](#key-features)
 - [🚀 Live OpenAPI Docs](#-live-docs)
 - [💻 Getting Started](#-getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Setup](#setup)
-    - [Install](#install)
-    - [Usage](#usage)
-    - [Run tests](#run-tests)
+  - [Prerequisites](#prerequisites)
+  - [Setup](#setup)
+  - [Environment Variables](#environment-variables)
+  - [Install](#install)
+  - [Usage](#usage)
+- [📋 Testing](#testing)
+  - [Swagger UI](#swagger-ui)
+  - [Queue Management](#queue-management)
+  - [Linting](#linting)
+  - [Auto-format](#auto-format)
+  - [Debugging](#debugging)
+  - [Debugging with VSCode](#using-the-debugger-with-vscode)
 - [🤝 Contributing](#-contributing)
-- [⭐️ Show your support](#-support)
+- [⭐️ Show your support](#-show-your-support)
 - [❓FAQ](#faq)
 - [📝 License](#-license)
 
@@ -25,7 +32,9 @@
 
 # 📖 `account-service` <a name="about-project"></a>
 
-Account Service is a service enabling easy interaction with [DSNP](https://dsnp.org/) accounts on [Frequency](https://docs.frequency.xyz/).
+Account Service is a service enabling easy interaction with [DSNP](https://dsnp.org/) accounts on [Frequency](https://docs.frequency.xyz/). Accounts can be defined as a user's handle and msaId.
+
+Visit [Key Features](#key-features) for more details on what Account Services does.
 
 <!-- Mermaid Arch maps -->
 
@@ -35,69 +44,7 @@ The account-service is a NestJS application that is split into two main parts: t
 
 The API is responsible for handling incoming HTTP requests and the Worker is responsible for processing jobs that require blockchain interaction.
 
-```mermaid
-flowchart RL
-    subgraph Provider["Provider"]
-        PB((("Provider Backend")))
-        GWH(["Global Webhook"])
-    end
-    subgraph TransactionHandler["Worker"]
-        TP["Transaction Processor"]
-        TN["Transaction Notification Processor/ Webhook publisher"]
-    end
-    subgraph S["API Services"]
-        direction RL
-        AS("Accounts Service")
-        APIS("API Service")
-        DS("Delegation Service")
-        HS("Handle Service")
-        KS("Keys Service")
-    end
-    subgraph NestJs["Nest.js"]
-        S
-        TransactionHandler
-    end
-    subgraph AccountsService["Accounts Service"]
-        C{"Controllers"}
-        NestJs
-    end
-    TP --> TN
-    TN -- Callback on MSA created on Delegation created --> GWH
-    PB -- GET/api/health --> C
-    PB -- GET/accounts/:msaId\nPOST/accounts/siwf --> C
-    PB -- GET/delegation/:msaId --> C
-    PB -- POST/handles\nPOST/handles/change\nGET/handles/:msaId --> C
-    PB -- POST/keys/add\nGET/keys/:msaId --> C
-    C -- API calls --> S
-    S -- Return off-chain GETs --> C
-    S -- On-chain calls --> TP
-    GWH --> PB
-    style PB fill:#FFF9C4
-    style AS fill:#BBDEFB,stroke:#2962FF
-    style APIS fill:none,stroke:#000000,color:#000000
-    style DS fill:#C8E6C9,stroke:#00C853
-    style HS fill:#FFF9C4,stroke:#FFD600
-    style KS fill:#FFE0B2,stroke:#FF6D00
-    style C fill:#E1BEE7,stroke:#AA00FF
-    linkStyle 3 stroke:#2962FF,fill:none
-    linkStyle 4 stroke:#00C853,fill:none
-    linkStyle 5 stroke:#FFD600,fill:none
-    linkStyle 6 stroke:#FF6D00,fill:none
-
-%%{
-        init: {
-            'theme': 'base',
-                'themeVariables': {
-                'primaryColor': '#ECECFF',
-                'primaryTextColor': '#000',
-                'primaryBorderColor': '#9999FF',
-                'lineColor': '#858585',
-                'secondaryColor': '#FFFDF0',
-                'tertiaryColor': '#fff'
-                }
-        }
-    }%%
-```
+![Gateway Account Service](./docs/account_service_arch.png)
 
 <p align="right">(<a href="#-table-of-contents">back to top</a>)</p>
 
@@ -197,6 +144,7 @@ flowchart RL
 <!-- Features -->
 
 ### Key Features
+
 - **Account creation using [SIWF](https://github.com/AmplicaLabs/siwf)**
   - Includes behind the scenes delegation to the provider
 - **Get User and Provider Account(s)**
@@ -215,7 +163,7 @@ flowchart RL
 
 ## 🚀 Live Docs
 
-- [Live Docs](https://amplicalabs.github.io/{gateway-service-repo})
+- [Live Docs](https://amplicalabs.github.io/account-service)
 
 <p align="right">(<a href="#-table-of-contents">back to top</a>)</p>
 
@@ -232,9 +180,6 @@ In order to run this project you need:
 - [Node.js](https://nodejs.org)
 - [Docker](https://docs.docker.com/get-docker/)
 
-### Environment Variables
-Modify any environment variables in the `.env` file as needed. For docker compose env `.env.docker.dev` file is used. The complete set of environment variables is documented [here](./ENVIRONMENT.md), and a sample environment file is provided [here](./env.template)
-
 ### Setup
 
 Clone this repository to your desired folder:
@@ -246,6 +191,17 @@ Example commands:
   cd account-service
 ```
 
+### Environment Variables
+
+Modify any environment variables in the `.env` file as needed. For docker compose env `.env.docker.dev` file is used. The complete set of environment variables is documented [here](./ENVIRONMENT.md), and a sample environment file is provided [here](./env.template).
+
+1. Copy the template values into the .env files.
+   ```sh
+   cp env.template .env
+   cp env.template .env.docker.dev
+   ```
+2. Replace template values with values appropriate to your environment.
+
 ### Install
 
 Install NPM Dependencies:
@@ -254,7 +210,9 @@ Install NPM Dependencies:
   npm install
 ```
 
-### ⚡ Quick Start
+### Usage
+
+Note: using [docker compose file](docker-compose.yaml) to start the services. This will start the services in development mode.
 
 In order to run the `account-service` in development mode without containers, you can use the following commands:
 
@@ -264,119 +222,86 @@ In order to run the `account-service` in development mode without containers, yo
    docker-compose up -d redis frequency
    ```
 
-2. In a new terminal window, start the `account-service` api app. Logs will be displayed in the terminal for easy reference.
-
-    ```bash
-    npm run start:api:debug
-    ```
-
-3. In another terminal window, start the `account-service` worker app.
-
-    ```bash
-    npm run start:worker:debug
-    ```
-
-### Usage
-
-Run the following commands to start the service:
-
-#### Start the service:
-
-```sh
-  docker-compose up
-```
-
-#### Swagger UI
-Check out the Swagger UI hosted on the app instance at [\<base url>/api/docs/swagger](http://localhost:3000/api/docs/swagger) to view the API documentation and submit requests to the service.
-
-#### Queue Management
-You may also view and manage the application's queue at [\<base url>/queues](http://localhost:3000/queues).
-
-### Run E2E Tests
-
-To run the E2E tests, run the following commands:
-
-Note: using [docker compose file](docker-compose.yaml) to start the services. This will start the services in development mode.
-
-1. Start redis and frequency with instant profile.
-
-   ```sh
-   docker-compose up -d redis frequency
-   ```
-
-   This will start Frequency and Redis
-
 2. Once [Frequency](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer) is up. Run an account setup with Alice as provider 1 and 2,3,4,5,6 as users.
 
    ```bash
-      make setup
+   make setup
    ```
 
-3. Run the following command in another terminal or in the background to start the mock webhook server.
+3. Start the mock webhook server by running the following command in another terminal or in the background.
 
    ```sh
-      make mock-webhook
+   make mock-webhook
    ```
 
-   This will start the mock webhook server.
-
-4. Run the following command to start the account service api and worker containers.
+4. Start the Api and Worker.<br /><br />
+   
+   **Option 1:** In a new terminal window, start the `account-service` api app. Logs will be displayed in the terminal for easy reference.
 
    ```sh
-      docker-compose up -d api worker
+   npm run start:api:debug
    ```
 
-   This will start the account service api and worker in development mode.
+   In another terminal window, start the `account-service` worker app.
+
+   ```sh
+   npm run start:worker:debug
+   ```
+
+   -- or -- <br /><br />
+
+   **Option 2:**
+   Run the following command to start the account service api and worker containers. This will start the account service api and worker in development mode.
+
+   ```sh
+   docker-compose up -d api worker
+   ```
 
 5. Check the job in [BullUI](http://0.0.0.0:3000/queues/), to monitor job progress based on defined tests.
 
-6. Run the tests
+## 📋 Testing
+
+### Run the tests.
 
    ```bash
-      make test-e2e
+   make test-e2e
    ```
 
    This will run the tests in `apps/api/test` folder.
 
-7. Check e2e test file for more details on the test.
+### Check e2e test file for more details on the test.
 
-## Development Environment
+### Swagger UI
 
-In order to run the account-service in development mode without containers, you can use the following commands:
+Check out the Swagger UI hosted on the app instance at [http://localhost:3000/api/docs/swagger](http://localhost:3000/api/docs/swagger) to view the API documentation and submit requests to the service.
 
-1. Start the redis server container and the frequency container. You can view the logs with your Docker setup.
+### Queue Management
 
-   ```bash
-   docker-compose up -d redis frequency
-   ```
+You may also view and manage the application's queue at [http://localhost:3000/queues](http://localhost:3000/queues).
 
-2. In a new terminal window, start the account-service api app. Logs will be displayed in the terminal for easy reference.
-
-    ```bash
-    npm run start:api:debug
-    ```
-
-3. In another terminal window, start the account-service worker app.
-
-    ```bash
-    npm run start:worker:debug
-    ```
-
-**Linting:**
+### Linting
 
 ```sh
   npm run lint
 ```
 
-**Auto-format:**
+### Auto-format
 
 ```sh
   npm run format
 ```
 
+### Debugging
+
+- Docker to stop containers, networks, volumes, and images created by `docker-compose up` run...
+  ```sh
+    docker-compose down
+  ```
+- You may have to go to your Docker Desktop app and manually remove containers.
+
 ### Using the Debugger with VSCode
 
-1. Follow step 1 from the Development Environment section above to setup the redis and frequency containers.
+1. Follow step 1 from the Development Environment section above to set up the redis and frequency containers.
 
 2. Use the debug panel and start the `Debug Api (NestJS via ts-node)` configuration, if you wish to debug the api.
 
@@ -393,7 +318,6 @@ In order to run the account-service in development mode without containers, you 
 5. Use [Swagger](http://0.0.0.0:3000/api/docs/swagger) to test the API.
 
 **Note:** Reference `.vscode/launch.json` for more details on the debug configurations and apply the concepts to your preferred debugger.
-
 
 <p align="right">(<a href="#-table-of-contents">back to top</a>)</p>
 
@@ -422,11 +346,11 @@ If you would like to explore contributing bug fixes or enhancements, issues with
 
 - **Can I use this service in my production social app?**
 
-    - Yes. All the Gateway Services are intended to be ready-to-use out of the box as part of the fabric of your own social media app using DSNP on Frequency.
+  - Yes. All the Gateway Services are intended to be ready-to-use out of the box as part of the fabric of your own social media app using DSNP on Frequency.
 
 - **I'm building the next Facebook, it's going to be huge! Will `account-service` scale?**
 
-    - Gateway Services are designed to support the scale of a small-to-medium-sized social app. For larger use cases, you would probably want to build your own services.
+  - Gateway Services are designed to support the scale of a small-to-medium-sized social app. For larger use cases, you would probably want to build your own services.
 
 <p align="right">(<a href="#-table-of-contents">back to top</a>)</p>
 
