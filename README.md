@@ -44,7 +44,7 @@ The account-service is a NestJS application that is split into two main parts: t
 
 The API is responsible for handling incoming HTTP requests and the Worker is responsible for processing jobs that require blockchain interaction.
 
-![Gateway Account Service](./docs/account_service_arch.png)
+![Gateway Account Service](./docs/account_service_arch.drawio.png)
 
 <p align="right">(<a href="#-table-of-contents">back to top</a>)</p>
 
