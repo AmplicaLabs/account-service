@@ -216,25 +216,25 @@ Note: using [docker compose file](docker-compose.yaml) to start the services. Th
 
 In order to run the `account-service` in development mode without containers, you can use the following commands:
 
-1. Start the Redis server container and the Frequency container. You can view the logs with your Docker setup.
+#### 1. Start the Redis server container and the Frequency container. You can view the logs with your Docker setup.
 
    ```bash
    docker-compose up -d redis frequency
    ```
 
-2. Once [Frequency](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer) is up. Run an account setup with Alice as provider 1 and 2,3,4,5,6 as users.
+#### 2. Once [Frequency](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0.0.1%3A9944#/explorer) is up. Run an account setup with Alice as provider 1 and 2,3,4,5,6 as users.
 
    ```bash
    make setup
    ```
 
-3. Start the mock webhook server by running the following command in another terminal or in the background.
+#### 3. Start the mock webhook server by running the following command in another terminal or in the background.
 
    ```sh
    make mock-webhook
    ```
 
-4. Start the Api and Worker.<br /><br />
+#### 4. Start the Api and Worker.<br /><br />
    
    **Option 1:** In a new terminal window, start the `account-service` api app. Logs will be displayed in the terminal for easy reference.
 
@@ -257,7 +257,7 @@ In order to run the `account-service` in development mode without containers, yo
    docker-compose up -d api worker
    ```
 
-5. Check the job in [BullUI](http://0.0.0.0:3000/queues/), to monitor job progress based on defined tests.
+#### 5. Check the job in [BullUI](http://0.0.0.0:3000/queues/), to monitor job progress based on defined tests.
 
 ## 📋 Testing
 
@@ -269,7 +269,7 @@ In order to run the `account-service` in development mode without containers, yo
 
    This will run the tests in `apps/api/test` folder.
 
-### Check e2e test file for more details on the test.
+#### Check e2e test file for more details on the test.
 
 ### Swagger UI
 
