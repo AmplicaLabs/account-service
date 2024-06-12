@@ -20,7 +20,8 @@ services:
     #   - SEALING_INTERVAL=3
     #   - CREATE_EMPTY_BLOCKS=true
     # Uncomment below if you want to let the chain run and keep all of the historical blocks
-    # command: --state-pruning=archive
+    # command: --state-pruning=archives
+    command: --offchain-worker=always --enable-offchain-indexing=true
     ports:
       - 9944:9944
     networks:

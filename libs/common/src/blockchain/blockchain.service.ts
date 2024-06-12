@@ -187,7 +187,11 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
 
   public async getKeysByMsa(msaId: number): Promise<KeyInfoResponse> {
     const keyInfoResponse = this.api.rpc.msa.getKeysByMsaId(msaId);
-    return (await firstValueFrom(keyInfoResponse)).unwrap();
+    const value = await firstValueFrom(keyInfoResponse);
+    if (value.isNone) {
+      throw new Error(`No keys found for msaId: ${msaId}`);
+    }
+    return value.unwrap();
   }
 
   public async addPublicKeyToMsa(keysRequest: KeysRequest): Promise<SubmittableExtrinsic<any>> {
