@@ -18,6 +18,8 @@ const FREQUENCY_URL = process.env.FREQUENCY_URL || 'ws://127.0.0.1:9944';
 
 const CAPACITY_AMOUNT_TO_STAKE = 2000000000000000n;
 
+const BASE_SEED_PHRASE = process.env.SEED_PHRASE || '//Alice';
+
 async function main() {
   await cryptoWaitReady();
   console.log('Connecting...');
@@ -26,14 +28,14 @@ async function main() {
 
   // Create provider
   console.log('Creating/resolving provider...');
-  const provider = await provisionProvider('//Alice', 'Alice');
+  const provider = await provisionProvider(`${BASE_SEED_PHRASE}`, 'Alice');
   console.log(`Provider ID is: ${provider.msaId!.toString()}`);
 
   // Ensure provider is staked
   await ensureProviderStake(provider.keypair, CAPACITY_AMOUNT_TO_STAKE, provider.msaId!);
 
   // Delegations
-  const delegators: ChainUser[] = await initializeLocalUsers('//Bob', 4000);
+  const delegators: ChainUser[] = await initializeLocalUsers(`${BASE_SEED_PHRASE}//users`, 256);
 
   // Create followers
   await provisionLocalUserCreationExtrinsics(provider, [...delegators.values()], { allocateHandle: false });
