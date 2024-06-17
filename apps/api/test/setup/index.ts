@@ -33,7 +33,7 @@ async function main() {
   await ensureProviderStake(provider.keypair, CAPACITY_AMOUNT_TO_STAKE, provider.msaId!);
 
   // Delegations
-  const delegators: ChainUser[] = await initializeLocalUsers('//Bob', 4);
+  const delegators: ChainUser[] = await initializeLocalUsers('//Bob', 4000);
 
   // Create followers
   await provisionLocalUserCreationExtrinsics(provider, [...delegators.values()], { allocateHandle: false });
