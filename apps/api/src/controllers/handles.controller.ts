@@ -44,7 +44,6 @@ export class HandlesController {
     }
   }
 
-
   @Post('/change')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request to change a handle' })

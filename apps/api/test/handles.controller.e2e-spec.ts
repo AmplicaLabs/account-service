@@ -4,22 +4,11 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import request from 'supertest';
-import {
-  ChainUser,
-  ExtrinsicHelper,
-  getClaimHandlePayload,
-  getCurrentBlockNumber,
-  initialize,
-  initializeLocalUsers,
-  provisionProvider,
-} from '@amplica-labs/frequency-scenario-template';
-import log from 'loglevel';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { ChainUser, ExtrinsicHelper, getClaimHandlePayload } from '@amplica-labs/frequency-scenario-template';
 import { uniqueNamesGenerator, colors, names } from 'unique-names-generator';
 import { ApiModule } from '../src/api.module';
+import { setupProviderAndUsers } from './e2e-setup.mock.spec';
 
-const FREQUENCY_URL = process.env.FREQUENCY_URL || 'ws://0.0.0.0:9944';
-const BASE_SEED_PHRASE = process.env.SEED_PHRASE || '//Alice';
 let HTTP_SERVER: any = process.env.HTTP_SERVER || 'http://0.0.0.0:3000';
 
 describe('Handles Controller', () => {
@@ -34,18 +23,9 @@ describe('Handles Controller', () => {
   let maxMsaId: string;
 
   beforeAll(async () => {
-    await cryptoWaitReady();
-    await initialize(FREQUENCY_URL);
-    log.setLevel('trace');
+    ({ provider, users, currentBlockNumber, maxMsaId } = await setupProviderAndUsers());
 
-    currentBlockNumber = await getCurrentBlockNumber();
-
-    // Get keys and MSA IDs for users provisioned in setup
-    provider = await provisionProvider(BASE_SEED_PHRASE, 'Alice');
-    users = await initializeLocalUsers(`${BASE_SEED_PHRASE}//users`, 4);
     const handlePayloads = users.slice(0, 2).map((u) => getClaimHandlePayload(u, handles[0], currentBlockNumber));
-
-    maxMsaId = (await ExtrinsicHelper.apiPromise.query.msa.currentMsaIdentifierMaximum()).toString();
 
     // Make sure handles for our test users are in a known state:
     // users[0] & users[1] have known handles (baseHandle = handles[0])
