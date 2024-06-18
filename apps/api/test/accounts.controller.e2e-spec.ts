@@ -63,6 +63,16 @@ describe('Account Controller', () => {
     await app.init();
   });
 
+  afterAll(async () => {
+    // Retire all claimed handles
+    try {
+      await Promise.allSettled(users.map((u) => ExtrinsicHelper.retireHandle(u.keypair).signAndSend()));
+    } catch (e) {
+      // do nothing
+      console.error(e);
+    }
+  });
+
   it('(GET) /accounts/:msaId with valid msaId and no handle', async () => {
     const user = users[1];
     const validMsaId = user.msaId?.toString();
