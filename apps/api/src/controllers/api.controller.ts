@@ -2,8 +2,8 @@ import { ApiService } from '#api/services/api.service';
 import { Controller, Get, HttpCode, HttpStatus, Logger } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-@Controller('api')
-@ApiTags('api')
+@Controller()
+@ApiTags('account-service', 'health')
 export class ApiController {
   private readonly logger: Logger;
 
