@@ -19,7 +19,10 @@ export const options = {
   vus: 100,
   duration: '10s',
   thresholds: {
+    checks: ['rate>=0.995'],
     http_req_duration: ['avg<100', 'p(95)<200'],
+    http_req_failed: ['rate<0.005'],
+    http_reqs: ['rate>=256'],
   },
   noConnectionReuse: true,
 };
