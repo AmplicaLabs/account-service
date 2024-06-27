@@ -46,15 +46,6 @@ const SLEEP_DURATION = 0.1;
 const BLOCKTIME_SECONDS = 12;
 // Global variables should be initialized.
 
-// function initiateApiRequest() {
-//   const res = http.post('https://api.example.com/trigger-callback', {
-//     callbackUrl: CALLBACK_URL,
-//   });
-//   check(res, {
-//     'initiation successful': (r) => r.status === 200,
-//   });
-// }
-
 function checkCallback() {
   const res = http.get(CALLBACK_URL);
   console.log('Callback response:', res.status, res.body);
