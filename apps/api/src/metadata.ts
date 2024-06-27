@@ -189,7 +189,6 @@ export default async () => {
           },
         ],
         [import('./controllers/health.controller'), { HealthController: { healthz: {}, livez: {}, readyz: {} } }],
-        [import('./controllers/api.controller'), { ApiController: { health: {} } }],
       ],
     },
   };
