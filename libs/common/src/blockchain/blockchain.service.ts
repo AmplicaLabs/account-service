@@ -250,8 +250,11 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
   }
 
   public async getHandleForMsa(msaId: AnyNumber): Promise<HandleResponse | null> {
-    const handleResponse = await this.rpc('handles', 'getHandleForMsa', msaId);
-    if (handleResponse.isSome) return handleResponse.unwrap();
+    const handleResponse = await this.rpc('handles', 'getHandleForMsa', msaId.toString());
+    if (handleResponse.isSome) {
+      return handleResponse.unwrap();
+    }
+    this.logger.error(`getHandleForMsa: No handle found for msaId: ${msaId}`);
     return null;
   }
 
