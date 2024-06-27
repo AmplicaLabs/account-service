@@ -36,11 +36,11 @@ const SLEEP_DURATION = 0.1;
 // Global variables should be initialized.
 
 export default function () {
-  group('/api/health', () => {
+  group('health', () => {
     // Request No. 1: ApiController_health
     // eslint-disable-next-line no-lone-blocks
     {
-      const url = `${BASE_URL}/api/health`;
+      const url = `${BASE_URL}/healthz`;
       const request = http.get(url);
 
       check(request, {
@@ -49,10 +49,10 @@ export default function () {
     }
   });
 
-  group('/accounts/siwf', () => {
+  group('/v1/accounts/siwf', () => {
     // Request No. 1: AccountsController_getSIWFConfig
     {
-      const url = `${BASE_URL}/accounts/siwf`;
+      const url = `${BASE_URL}/v1/accounts/siwf`;
       const request = http.get(url);
 
       check(request, {
@@ -64,7 +64,7 @@ export default function () {
 
     // Request No. 2: AccountsController_postSignInWithFrequency
     {
-      const url = `${BASE_URL}/accounts/siwf`;
+      const url = `${BASE_URL}/v1/accounts/siwf`;
       // Use the SIWF sample Sign Up request body for a new user.
       const body = {
         signUp: {
@@ -93,12 +93,12 @@ export default function () {
     }
   });
 
-  group('/accounts/{msaId}', () => {
+  group('/v1/accounts/{msaId}', () => {
     const msaId = randomIntBetween(2, 256);
 
     // Request No. 1: AccountsController_getAccount
     {
-      const url = `${BASE_URL}/accounts/${msaId.toString()}`;
+      const url = `${BASE_URL}/v1/accounts/${msaId.toString()}`;
       const request = http.get(url);
 
       check(request, {
@@ -107,12 +107,12 @@ export default function () {
     }
   });
 
-  group('/delegation/{msaId}', () => {
+  group('/v1/delegation/{msaId}', () => {
     const msaId = randomIntBetween(2, 256);
 
     // Request No. 1: DelegationController_getDelegation
     {
-      const url = `${BASE_URL}/delegation/${msaId.toString()}`;
+      const url = `${BASE_URL}/v1/delegation/${msaId.toString()}`;
       const request = http.get(url);
 
       check(request, {
@@ -121,10 +121,10 @@ export default function () {
     }
   });
 
-  group('/keys/add', () => {
+  group('/v1/keys/add', () => {
     // Request No. 1: KeysController_addKey
     // eslint-disable-next-line no-lone-blocks
-    const url = `${BASE_URL}/keys/add`;
+    const url = `${BASE_URL}/v1/keys/add`;
     const keysRequest = {
       msaOwnerAddress: '5G3aEHgZSr3cG1qY4QapTb9osftUYRCkYKShcywVvxdVuvdt',
       msaOwnerSignature:
@@ -152,12 +152,12 @@ export default function () {
     });
   });
 
-  group('/keys/{msaId}', () => {
+  group('/v1/keys/{msaId}', () => {
     const msaId = randomIntBetween(2, 256);
 
     // Request No. 1: KeysController_getKeys
     {
-      const url = `${BASE_URL}/keys/${msaId}`;
+      const url = `${BASE_URL}/v1/keys/${msaId}`;
       const request = http.get(url);
 
       check(request, {
@@ -166,11 +166,11 @@ export default function () {
     }
   });
 
-  group('/handles', () => {
+  group('/v1/handles', () => {
     // Request No. 1: HandlesController_createHandle
     // eslint-disable-next-line no-lone-blocks
     {
-      const url = `${BASE_URL}/handles`;
+      const url = `${BASE_URL}/v1/handles`;
       // Sample data copied from e2e test case.
       // As the worker is not required for the load test, these values only need to simulate the request.
       const body = {
@@ -196,11 +196,11 @@ export default function () {
     }
   });
 
-  group('/handles/change', () => {
+  group('/v1/handles/change', () => {
     // Request No. 1: HandlesController_changeHandle
     // eslint-disable-next-line no-lone-blocks
     {
-      const url = `${BASE_URL}/handles/change`;
+      const url = `${BASE_URL}/v1/handles/change`;
       // Sample data copied from the e2e tests.
       // As the worker is not required for the load test, these values only need to simulate the request.
       const body = {
@@ -226,12 +226,12 @@ export default function () {
     }
   });
 
-  group('/handles/{msaId}', () => {
+  group('/v1/handles/{msaId}', () => {
     const msaId = '2';
 
     // Request No. 1: HandlesController_getHandle
     {
-      const url = `${BASE_URL}/handles/${msaId}`;
+      const url = `${BASE_URL}/v1/handles/${msaId}`;
       const request = http.get(url);
 
       check(request, {
