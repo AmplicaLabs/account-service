@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { HandleResponse } from '@frequency-chain/api-augment/interfaces';
+import type { HandleResponse } from '@frequency-chain/api-augment/interfaces';
 
 export class AccountResponse {
   @ApiProperty()
