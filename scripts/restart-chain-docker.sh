@@ -21,9 +21,10 @@ sleep 15
 echo "Running make setup to provision Provider with capacity, etc..."
 make setup
 
-# Start the mock web server
-make mock-webhook
-
 # Start all services in detached mode
 echo "Starting all services..."
 docker compose up -d
+
+# Start the mock web server
+echo "Please run 'make mock-webhook' in a separate terminal..."
+

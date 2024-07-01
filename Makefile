@@ -63,12 +63,12 @@ dev-webhook:
 
 .PHONY: restart-chain-docker
 restart-chain-docker:
-	@cd scripts && ./restart-chain-docker.sh
+	@./scripts/restart-chain-docker.sh
 
 .PHONY: restart-local-dev
 restart-local-dev:
-	@cd scripts && ./restart-local-dev.sh
+	@./scripts/restart-local-dev.sh
 
 .PHONY: docker-clean-up
 docker-clean-up:
-	@cd scripts && ./docker-clean-up.sh
+	@./scripts/docker-clean-up.sh
