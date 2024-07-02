@@ -71,7 +71,7 @@ describe('Account Controller', () => {
   });
 
   it('(GET) /v1/accounts/:msaId with valid msaId and no handle', async () => {
-    const user = users[1];
+    const user = users[2];
     const validMsaId = user.msaId?.toString();
     await request(app.getHttpServer()).get(`/v1/accounts/${validMsaId}`).expect(200).expect({
       msaId: user.msaId?.toString(),
@@ -92,7 +92,7 @@ describe('Account Controller', () => {
     await request(app.getHttpServer())
       .get(`/v1/accounts/${validMsaId}`)
       .expect(200)
-      .expect((res) => res.body.msaId === validMsaId);
-    // .expect((res) => res.body.handle === handle.unwrap());
+      .expect((res) => res.body.msaId === validMsaId)
+      .expect((res) => res.body.handle.base_handle === handle);
   });
 });
