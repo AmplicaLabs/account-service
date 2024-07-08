@@ -101,9 +101,13 @@ export class TxnNotifierService extends BaseConsumer {
               } else {
                 const siwfTxnValues = this.blockchainService.handleSIWFTxnResult(txResult.events);
 
+                const handle = await this.blockchainService.getHandleForMsa(siwfTxnValues.msaId);
+
+                if (!handle) throw new Error(`No handle found for MSA ID ${siwfTxnValues.msaId}.`);
+
                 webhookResponse = createWebhookRsp(job, siwfTxnValues.msaId, {
                   accountId: siwfTxnValues.address,
-                  handle: siwfTxnValues.handle,
+                  handle,
                 });
 
                 this.logger.log(

@@ -1,4 +1,5 @@
 import { BlockHash, Hash } from '@polkadot/types/interfaces';
+import { HandleResponse } from '@frequency-chain/api-augment/interfaces';
 import { PublishHandleRequest } from './handles.request.dto';
 import { PublishSIWFSignupRequest } from './wallet.login.request.dto';
 import { PublishKeysRequest } from './keys.request.dto';
@@ -22,8 +23,8 @@ export type TxWebhookRspBase = {
   msaId: string;
 };
 
-export type PublishHandleOpts = { handle: string };
-export type SIWFOpts = { handle: string; accountId: string };
+export type PublishHandleOpts = { handle: HandleResponse };
+export type SIWFOpts = { handle: HandleResponse; accountId: string };
 export type PublishKeysOpts = { newPublicKey: string };
 export type TxWebhookOpts = PublishHandleOpts | SIWFOpts | PublishKeysOpts;
 

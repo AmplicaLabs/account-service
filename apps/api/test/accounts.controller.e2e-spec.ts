@@ -24,7 +24,7 @@ describe('Account Controller', () => {
     const handlePayload = getClaimHandlePayload(users[0], handle, currentBlockNumber);
 
     // Make sure handles for our test users are in a known state:
-    // users[0] has a known handle (baseHandle = handles[0])
+    // users[0] has a known handle (handle = handles[0])
     // users[2] & users[3] have no handle
     try {
       await Promise.allSettled([
