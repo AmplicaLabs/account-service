@@ -10,24 +10,14 @@ import { TxnNotifierService } from './notifier.service';
   imports: [
     BlockchainModule,
     ConfigModule,
-    BullModule.registerQueue(
-      {
-        name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
-        defaultJobOptions: {
-          removeOnComplete: 20,
-          removeOnFail: false,
-          attempts: 3,
-        },
+    BullModule.registerQueue({
+      name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
+      defaultJobOptions: {
+        removeOnComplete: 20,
+        removeOnFail: false,
+        attempts: 3,
       },
-      {
-        name: QueueConstants.TRANSACTION_NOTIFY_QUEUE,
-        defaultJobOptions: {
-          removeOnComplete: 20,
-          removeOnFail: false,
-          attempts: 3,
-        },
-      },
-    ),
+    }),
   ],
   providers: [EnqueueService, TxnNotifierService],
   exports: [EnqueueService, TxnNotifierService],

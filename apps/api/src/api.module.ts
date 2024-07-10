@@ -74,24 +74,14 @@ import { HealthController } from './controllers/health.controller';
       }),
       inject: [ConfigService],
     }),
-    BullModule.registerQueue(
-      {
-        name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
-        defaultJobOptions: {
-          removeOnComplete: 20,
-          removeOnFail: false,
-          attempts: 1,
-        },
+    BullModule.registerQueue({
+      name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
+      defaultJobOptions: {
+        removeOnComplete: 20,
+        removeOnFail: false,
+        attempts: 1,
       },
-      {
-        name: QueueConstants.TRANSACTION_NOTIFY_QUEUE,
-        defaultJobOptions: {
-          removeOnComplete: 20,
-          removeOnFail: false,
-          attempts: 3,
-        },
-      },
-    ),
+    }),
     // Bullboard UI
     BullBoardModule.forRoot({
       route: '/queues',
@@ -99,10 +89,6 @@ import { HealthController } from './controllers/health.controller';
     }),
     BullBoardModule.forFeature({
       name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
-      adapter: BullMQAdapter,
-    }),
-    BullBoardModule.forFeature({
-      name: QueueConstants.TRANSACTION_NOTIFY_QUEUE,
       adapter: BullMQAdapter,
     }),
     ScheduleModule.forRoot(),

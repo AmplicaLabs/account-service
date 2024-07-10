@@ -63,24 +63,14 @@ import { TransactionPublisherModule } from './transaction_publisher/publisher.mo
       }),
       inject: [ConfigService],
     }),
-    BullModule.registerQueue(
-      {
-        name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
-        defaultJobOptions: {
-          removeOnComplete: 20,
-          removeOnFail: false,
-          attempts: 1,
-        },
+    BullModule.registerQueue({
+      name: QueueConstants.TRANSACTION_PUBLISH_QUEUE,
+      defaultJobOptions: {
+        removeOnComplete: 20,
+        removeOnFail: false,
+        attempts: 1,
       },
-      {
-        name: QueueConstants.TRANSACTION_NOTIFY_QUEUE,
-        defaultJobOptions: {
-          removeOnComplete: 20,
-          removeOnFail: false,
-          attempts: 3,
-        },
-      },
-    ),
+    }),
     ScheduleModule.forRoot(),
     BlockchainModule,
     TransactionPublisherModule,
