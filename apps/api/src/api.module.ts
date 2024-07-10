@@ -107,15 +107,7 @@ import { HealthController } from './controllers/health.controller';
     }),
     ScheduleModule.forRoot(),
   ],
-  providers: [
-    ApiService,
-    AccountsService,
-    HandlesService,
-    DelegationService,
-    KeysService,
-    ConfigService,
-    EnqueueService,
-  ],
+  providers: [ApiService, AccountsService, HandlesService, DelegationService, KeysService, EnqueueService],
   // Controller order determines the order of display for docs
   // v[Desc first][ABC Second], Health, and then Dev only last
   controllers: [AccountsControllerV1, DelegationControllerV1, HandlesControllerV1, KeysControllerV1, HealthController],

@@ -1,10 +1,8 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { BlockchainModule } from '#lib/blockchain/blockchain.module';
-import { BlockchainService } from '#lib/blockchain/blockchain.service';
 import { QueueConstants } from '#lib/utils/queues';
 import { ConfigModule } from '#lib/config/config.module';
-import { ConfigService } from '#lib/config/config.service';
 import { EnqueueService } from '#lib/services/enqueue-request.service';
 import { TxnNotifierService } from './notifier.service';
 
@@ -31,7 +29,7 @@ import { TxnNotifierService } from './notifier.service';
       },
     ),
   ],
-  providers: [TxnNotifierService, BlockchainService, EnqueueService, ConfigService],
-  exports: [TxnNotifierService, BlockchainService, EnqueueService, ConfigService],
+  providers: [EnqueueService, TxnNotifierService],
+  exports: [EnqueueService, TxnNotifierService],
 })
 export class TxnNotifierModule {}
