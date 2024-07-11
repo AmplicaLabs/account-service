@@ -366,9 +366,9 @@ export class BlockchainService implements OnApplicationBootstrap, OnApplicationS
   }
 
   /**
-   * Description
+   * Handles the PublicKeyAdded transaction result events and extracts the public key from the event data.
    * @param {Event} event - The PublicKeyAdded event
-   * @returns {PublicKeyValuesy} An object containing the MSA ID & new public key
+   * @returns {PublicKeyValues} An object containing the MSA ID & new public key
    */
   public handlePublishKeyTxResult(event: Event): PublicKeyValues {
     const publicKeyValues: Partial<PublicKeyValues> = {};
