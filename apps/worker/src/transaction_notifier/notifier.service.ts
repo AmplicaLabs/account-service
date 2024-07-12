@@ -50,6 +50,7 @@ export class TxnNotifierService
     private readonly configService: ConfigService,
   ) {
     super(cacheManager, blockchainService, new Logger(TxnNotifierService.prototype.constructor.name));
+    this.scanParameters = { onlyFinalized: true };
   }
 
   public get intervalName() {
@@ -74,12 +75,20 @@ export class TxnNotifierService
 
   protected async checkInitialScanParameters(): Promise<boolean> {
     const pendingTxns = await this.cacheManager.hlen(RedisUtils.TXN_WATCH_LIST_KEY);
-    return pendingTxns > 0;
+    if (pendingTxns === 0) {
+      return false;
+    }
+    return super.checkInitialScanParameters();
   }
 
-  protected async checkScanParameters(): Promise<boolean> {
+  protected async checkScanParameters(blockNumber: number, blockHash: BlockHash): Promise<boolean> {
     const pendingTxns = await this.cacheManager.hlen(RedisUtils.TXN_WATCH_LIST_KEY);
-    return pendingTxns > 0;
+
+    if (pendingTxns === 0) {
+      return false;
+    }
+
+    return super.checkScanParameters(blockNumber, blockHash);
   }
 
   public async getLastSeenBlockNumber(): Promise<number> {

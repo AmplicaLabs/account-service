@@ -3,13 +3,20 @@ import { Logger } from '@nestjs/common';
 import { BlockHash } from '@polkadot/types/interfaces';
 import { BlockchainService } from '#lib/blockchain/blockchain.service';
 import Redis from 'ioredis';
+import { ok } from 'assert';
 
 export const LAST_SEEN_BLOCK_NUMBER_KEY = 'lastSeenBlockNumber';
+
+export interface IBlockchainScanParameters {
+  onlyFinalized?: boolean;
+}
 
 export abstract class BlockchainScannerService {
   protected scanInProgress = false;
 
   private readonly lastSeenBlockNumberKey: string;
+
+  private p_scanParameters: IBlockchainScanParameters = {};
 
   constructor(
     protected cacheManager: Redis,
@@ -17,6 +24,17 @@ export abstract class BlockchainScannerService {
     protected readonly logger: Logger,
   ) {
     this.lastSeenBlockNumberKey = `${this.constructor.name}:${LAST_SEEN_BLOCK_NUMBER_KEY}`;
+  }
+
+  public get scanParameters() {
+    return this.p_scanParameters;
+  }
+
+  public set scanParameters(params: IBlockchainScanParameters) {
+    this.p_scanParameters = {
+      ...this.p_scanParameters,
+      ...params,
+    };
   }
 
   public async scan(): Promise<void> {
@@ -47,7 +65,7 @@ export abstract class BlockchainScannerService {
       this.logger.verbose(`Starting scan from block #${currentBlockNumber}`);
 
       // eslint-disable-next-line no-await-in-loop
-      while (!currentBlockHash.isEmpty && !!(await this.checkScanParameters())) {
+      while (!currentBlockHash.isEmpty && !!(await this.checkScanParameters(currentBlockNumber, currentBlockHash))) {
         // eslint-disable-next-line no-await-in-loop
         await this.processCurrentBlock(currentBlockHash, currentBlockNumber);
         // eslint-disable-next-line no-await-in-loop
@@ -84,8 +102,14 @@ export abstract class BlockchainScannerService {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  protected checkScanParameters(): Promise<boolean> {
-    return Promise.resolve(true);
+  protected async checkScanParameters(blockNumber: number, _blockHash: BlockHash): Promise<boolean> {
+    let okToScan = true;
+    if (this.scanParameters?.onlyFinalized) {
+      const lastFinalizedBlockNumber = await this.blockchainService.getLatestFinalizedBlockNumber();
+      okToScan = blockNumber > lastFinalizedBlockNumber;
+    }
+
+    return okToScan;
   }
 
   protected abstract processCurrentBlock(currentBlockHash: BlockHash, currentBlockNumber: number): Promise<void>;
