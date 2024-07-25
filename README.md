@@ -1,3 +1,17 @@
+# Repository Archived and Moved
+
+**This repository has been archived and its contents have been moved to a new location.**
+
+You can now find the `account-service` repository within the [AmplicaLabs/gateway](https://github.com/AmplicaLabs/gateway.git) repository at the following path:
+
+`./services/account`
+
+For any future updates or contributions, please refer to the new location. Thank you!
+
+---
+
+**Link to the new repository: [AmplicaLabs/gateway](https://github.com/AmplicaLabs/gateway.git)**
+
 # Account Service
 
 <!-- TABLE OF CONTENTS -->
